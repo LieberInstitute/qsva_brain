@@ -110,11 +110,22 @@ all <- mapply(function(f, type, region) {
 
 
 rse_merge_pair <- function(rse1, rse2) {
+    if(!identical(ranges(rse1), ranges(rse2))) {
+        ov <- findOverlaps(rse1, rse2, type = 'equal')
+        message(paste(Sys.time(), 'not all ranges are in both sets, keeping only the common ones using the range info from the first region'))
+        print(table(table(queryHits(ov))))
+        print(table(table(subjectHits(ov))))
+        rse1 <- rse1[queryHits(ov), ]
+        rse2 <- rse2[subjectHits(ov), ]
+        mcols(rowRanges(rse2)) <- mcols(rowRanges(rse1))
+    }
+    
     if(!identical(mcols(rse1)$Symbol, mcols(rse2)$Symbol)) {
         stopifnot(nrow(rse1) == nrow(rse2))
         message(paste(Sys.time(), 'using the "Symbol" information from the first region'))
         mcols(rse2)$Symbol <- mcols(rse1)$Symbol
     }
+    
     rses <- list(rse1, rse2)
     cols <- sapply(rses, function(x) colnames(colData(x)))
     common <- intersect(cols[[1]], cols[[2]])
@@ -161,6 +172,8 @@ rse_merge_pair_jx <- function(rse1, rse2) {
     # fix junction row names
     rownames(rse_jx) <- paste0(seqnames(rse_jx), ":", start(rse_jx), "-",
         end(rse_jx), "(", strand(rse_jx), ")")
+    
+    return(rse_jx)
 }
 
 rse_merge_jx <- function(rses) {
@@ -171,11 +184,16 @@ rse_merge_jx <- function(rses) {
 }
 
 ## Combine across regions
+message(paste(Sys.time(), 'merging the gene info'))
 rse_gene <- rse_merge(all[types == 'gene'])
+message(paste(Sys.time(), 'merging the exon info'))
 rse_exon <- rse_merge(all[types == 'exon'])
+message(paste(Sys.time(), 'merging the tx info'))
 rse_tx <- rse_merge(all[types == 'tx'])
-rse_jx <- rse_merge(all[types == 'jx'])
+message(paste(Sys.time(), 'merging the jx info'))
+rse_jx <- rse_merge_jx(all[types == 'jx'])
 
+message(paste(Sys.time(), 'extracting expression info'))
 exprs <- list(
     'gene' = assays(rse_gene)$rpkm,
     'exon' = assays(rse_exon)$rpkm,
@@ -193,7 +211,7 @@ dir.create('pdf', showWarnings = FALSE)
 
 cutoffs <- sapply(names(exprs), function(type) {
     
-    message(type)
+    message(paste(Sys.time(), 'finding the suggested cutoffs for', type))
     pdf(paste0('pdf/suggested_expr_cutoffs_', tolower(type), '.pdf'), width = 12)
     cuts <- expression_cutoff(exprs[[type]], seed = seeds[type])
     message(paste(cuts, collapse = ' '))
