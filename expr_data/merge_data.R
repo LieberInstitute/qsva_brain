@@ -39,7 +39,7 @@ all <- mapply(function(f, type, region) {
         rse <- rse_exon
     } else if (type == 'jx') {
         ## Try getRPKM based on https://github.com/LieberInstitute/brainseq_phase2/blob/54c73b2b4cd65af93a254ff8f38eed6a8d5c362a/caseControl_analysis_hippo.R#L42
-        rowRanges(rse_jx)$Length <- 100
+        rowRanges(rse_jx)$Length <- 100 / 8
         #assays(rse_jx)$rp10m <- recount::getRPKM(rse_jx, 'Length')
         rowRanges(rse_jx)$meanExprs <- NA
         colData(rse_jx)$Region <- region
@@ -179,7 +179,7 @@ rse_merge_pair_jx <- function(rse1, rse2) {
 rse_merge_jx <- function(rses) {
     res <- rses[[1]]
     for(i in (1 + seq_len(length(rses) - 1))) res <- rse_merge_pair_jx(res, rses[[i]])
-    assays(res)$rp10m <- recount::getRPKM(res, 'Length')
+    assays(res)$rp80m <- recount::getRPKM(res, 'Length')
     return(res)
 }
 
@@ -197,7 +197,7 @@ message(paste(Sys.time(), 'extracting expression info'))
 exprs <- list(
     'gene' = assays(rse_gene)$rpkm,
     'exon' = assays(rse_exon)$rpkm,
-    'jx' = assays(rse_jx)$rp10m,
+    'jx' = assays(rse_jx)$rp80m,
     'tx' = assay(rse_tx)
 )
 
