@@ -1,0 +1,360 @@
+**** Job starts ****
+Tue Jan 30 21:56:40 EST 2018
+**** JHPCE info ****
+User: lcollado
+Job id: 4431278
+Job name: merge_qsva_data
+Hostname: compute-094
+Task id: 
+Using the following user library: ~/R/x86_64-pc-linux-gnu-library/3.4.x
+Loading required package: methods
+Loading required package: GenomicRanges
+Loading required package: stats4
+Loading required package: BiocGenerics
+Loading required package: parallel
+
+Attaching package: ‘BiocGenerics’
+
+The following objects are masked from ‘package:parallel’:
+
+    clusterApply, clusterApplyLB, clusterCall, clusterEvalQ,
+    clusterExport, clusterMap, parApply, parCapply, parLapply,
+    parLapplyLB, parRapply, parSapply, parSapplyLB
+
+The following objects are masked from ‘package:stats’:
+
+    IQR, mad, sd, var, xtabs
+
+The following objects are masked from ‘package:base’:
+
+    anyDuplicated, append, as.data.frame, cbind, colMeans, colnames,
+    colSums, do.call, duplicated, eval, evalq, Filter, Find, get, grep,
+    grepl, intersect, is.unsorted, lapply, lengths, Map, mapply, match,
+    mget, order, paste, pmax, pmax.int, pmin, pmin.int, Position, rank,
+    rbind, Reduce, rowMeans, rownames, rowSums, sapply, setdiff, sort,
+    table, tapply, union, unique, unsplit, which, which.max, which.min
+
+Loading required package: S4Vectors
+
+Attaching package: ‘S4Vectors’
+
+The following object is masked from ‘package:base’:
+
+    expand.grid
+
+Loading required package: IRanges
+Loading required package: GenomeInfoDb
+Loading required package: Biobase
+Welcome to Bioconductor
+
+    Vignettes contain introductory material; view with
+    'browseVignettes()'. To cite Bioconductor, see
+    'citation("Biobase")', and for packages 'citation("pkgname")'.
+
+Loading required package: DelayedArray
+Loading required package: matrixStats
+
+Attaching package: ‘matrixStats’
+
+The following objects are masked from ‘package:Biobase’:
+
+    anyMissing, rowMedians
+
+
+Attaching package: ‘DelayedArray’
+
+The following objects are masked from ‘package:matrixStats’:
+
+    colMaxs, colMins, colRanges, rowMaxs, rowMins, rowRanges
+
+The following object is masked from ‘package:base’:
+
+    apply
+
+Setting options('download.file.method.GEOquery'='auto')
+Setting options('GEOquery.inmemory.gpl'=FALSE)
+Loading required package: rafalib
+
+Attaching package: ‘devtools’
+
+The following object is masked from ‘package:rafalib’:
+
+    install_bioc
+
+2018-01-30 21:57:05 processing brain region AMYGDALA for feature type exon
+Loading objects:
+  rse_exon
+  getRPKM
+2018-01-30 21:57:21 processing brain region AMYGDALA for feature type gene
+Loading objects:
+  rse_gene
+  getRPKM
+2018-01-30 21:57:22 processing brain region AMYGDALA for feature type jx
+Loading objects:
+  rse_jx
+2018-01-30 21:58:01 processing brain region AMYGDALA for feature type tx
+Loading objects:
+  rse_tx
+2018-01-30 21:58:06 processing brain region CAUDATE for feature type exon
+Loading objects:
+  rse_exon
+2018-01-30 21:58:15 processing brain region CAUDATE for feature type gene
+Loading objects:
+  rse_gene
+2018-01-30 21:58:16 processing brain region CAUDATE for feature type jx
+Loading objects:
+  rse_jx
+2018-01-30 21:58:58 processing brain region CAUDATE for feature type tx
+Loading objects:
+  rse_tx
+2018-01-30 21:59:05 processing brain region DLPFC for feature type exon
+Loading objects:
+  rse_exon
+2018-01-30 21:59:13 processing brain region DLPFC for feature type gene
+Loading objects:
+  rse_gene
+2018-01-30 21:59:14 processing brain region DLPFC for feature type jx
+Loading objects:
+  rse_jx
+2018-01-30 21:59:52 processing brain region DLPFC for feature type tx
+Loading objects:
+  rse_tx
+2018-01-30 21:59:56 processing brain region HIPPO for feature type exon
+Loading objects:
+  rse_exon
+2018-01-30 22:00:02 processing brain region HIPPO for feature type gene
+Loading objects:
+  rse_gene
+2018-01-30 22:00:03 processing brain region HIPPO for feature type jx
+Loading objects:
+  rse_jx
+2018-01-30 22:00:54 processing brain region HIPPO for feature type tx
+Loading objects:
+  rse_tx
+2018-01-30 22:00:58 processing brain region MPFC for feature type exon
+Loading objects:
+  rse_exon
+2018-01-30 22:01:09 processing brain region MPFC for feature type gene
+Loading objects:
+  rse_gene
+2018-01-30 22:01:10 processing brain region MPFC for feature type jx
+Loading objects:
+  rse_jx
+2018-01-30 22:01:52 processing brain region MPFC for feature type tx
+Loading objects:
+  rse_tx
+2018-01-30 22:01:56 processing brain region SACC for feature type exon
+Loading objects:
+  rse_exon
+  getRPKM
+2018-01-30 22:02:02 processing brain region SACC for feature type gene
+Loading objects:
+  rse_gene
+  getRPKM
+2018-01-30 22:02:03 processing brain region SACC for feature type jx
+Loading objects:
+  rse_jx
+2018-01-30 22:02:38 processing brain region SACC for feature type tx
+Loading objects:
+  rse_tx
+2018-01-30 22:02:42 merging the gene info
+2018-01-30 22:02:42 using the "Symbol" information from the first region
+2018-01-30 22:02:46 using the "Symbol" information from the first region
+2018-01-30 22:02:47 using the "Symbol" information from the first region
+2018-01-30 22:02:47 using the "Symbol" information from the first region
+2018-01-30 22:02:47 merging the exon info
+2018-01-30 22:02:48 not all ranges are in both sets, keeping only the common ones using the range info from the first region
+
+     1 
+571612 
+
+     1 
+571612 
+2018-01-30 22:02:53 not all ranges are in both sets, keeping only the common ones using the range info from the first region
+
+     1 
+571612 
+
+     1 
+571612 
+2018-01-30 22:03:02 not all ranges are in both sets, keeping only the common ones using the range info from the first region
+
+     1 
+571612 
+
+     1 
+571612 
+2018-01-30 22:03:08 not all ranges are in both sets, keeping only the common ones using the range info from the first region
+
+     1 
+571612 
+
+     1 
+571612 
+2018-01-30 22:03:17 not all ranges are in both sets, keeping only the common ones using the range info from the first region
+
+     1 
+571612 
+
+     1 
+571612 
+2018-01-30 22:03:23 merging the tx info
+2018-01-30 22:03:25 merging the jx info
+2018-01-30 22:09:32 extracting expression info
+2018-01-30 22:09:46 finding the suggested cutoffs for gene
+2018-01-30 22:11:07 the suggested expression cutoff is 0.22
+0.24 0.21
+2018-01-30 22:11:07 finding the suggested cutoffs for exon
+2018-01-30 22:12:46 the suggested expression cutoff is 0.25
+0.28 0.22
+2018-01-30 22:12:46 finding the suggested cutoffs for jx
+2018-01-30 22:16:32 the suggested expression cutoff is 0.42
+0.28 0.56
+2018-01-30 22:16:32 finding the suggested cutoffs for tx
+2018-01-30 22:17:47 the suggested expression cutoff is 0.31
+0.34 0.28
+gene exon   jx   tx 
+0.24 0.28 0.56 0.34 
+[1] "Reproducibility information:"
+[1] "2018-01-30 22:47:12 EST"
+    user   system  elapsed 
+2964.151   56.568 3032.673 
+Session info ----------------------------------------------------------------------------------------------------------
+ setting  value                                      
+ version  R version 3.4.3 Patched (2018-01-20 r74142)
+ system   x86_64, linux-gnu                          
+ ui       X11                                        
+ language (EN)                                       
+ collate  en_US.UTF-8                                
+ tz       US/Eastern                                 
+ date     2018-01-30                                 
+
+Packages --------------------------------------------------------------------------------------------------------------
+ package              * version   date       source                                   
+ acepack                1.4.1     2016-10-29 CRAN (R 3.4.1)                           
+ AnnotationDbi          1.40.0    2017-11-29 Bioconductor                             
+ assertthat             0.2.0     2017-04-11 CRAN (R 3.4.1)                           
+ backports              1.1.2     2017-12-13 CRAN (R 3.4.2)                           
+ base                 * 3.4.3     2018-01-20 local                                    
+ base64enc              0.1-3     2015-07-28 CRAN (R 3.4.1)                           
+ bindr                  0.1       2016-11-13 CRAN (R 3.4.1)                           
+ bindrcpp               0.2       2017-06-17 CRAN (R 3.4.1)                           
+ Biobase              * 2.38.0    2017-11-07 Bioconductor                             
+ BiocGenerics         * 0.24.0    2017-11-29 Bioconductor                             
+ BiocParallel           1.12.0    2017-11-29 Bioconductor                             
+ biomaRt                2.34.1    2018-01-09 Bioconductor                             
+ Biostrings             2.46.0    2017-11-29 Bioconductor                             
+ bit                    1.1-12    2014-04-09 CRAN (R 3.4.1)                           
+ bit64                  0.9-7     2017-05-08 CRAN (R 3.4.1)                           
+ bitops                 1.0-6     2013-08-17 CRAN (R 3.4.1)                           
+ blob                   1.1.0     2017-06-17 CRAN (R 3.4.1)                           
+ BSgenome               1.46.0    2017-11-29 Bioconductor                             
+ bumphunter             1.20.0    2017-11-29 Bioconductor                             
+ cellranger             1.1.0     2016-07-27 CRAN (R 3.4.1)                           
+ checkmate              1.8.5     2017-10-24 CRAN (R 3.4.2)                           
+ cluster                2.0.6     2017-03-10 CRAN (R 3.4.3)                           
+ codetools              0.2-15    2016-10-05 CRAN (R 3.4.3)                           
+ colorspace             1.3-2     2016-12-14 CRAN (R 3.4.1)                           
+ compiler               3.4.3     2018-01-20 local                                    
+ data.table             1.10.4-3  2017-10-27 CRAN (R 3.4.2)                           
+ datasets             * 3.4.3     2018-01-20 local                                    
+ DBI                    0.7       2017-06-18 CRAN (R 3.4.1)                           
+ DelayedArray         * 0.4.1     2017-11-07 Bioconductor                             
+ derfinder              1.12.0    2017-11-29 Bioconductor                             
+ derfinderHelper        1.12.0    2017-11-29 Bioconductor                             
+ devtools             * 1.13.4    2017-11-09 CRAN (R 3.4.2)                           
+ digest                 0.6.14    2018-01-14 CRAN (R 3.4.2)                           
+ doRNG                  1.6.6     2017-04-10 CRAN (R 3.4.1)                           
+ downloader             0.4       2015-07-09 CRAN (R 3.4.1)                           
+ dplyr                  0.7.4     2017-09-28 CRAN (R 3.4.1)                           
+ foreach                1.4.4     2017-12-12 CRAN (R 3.4.2)                           
+ foreign                0.8-69    2017-06-22 CRAN (R 3.4.3)                           
+ Formula                1.2-2     2017-07-10 CRAN (R 3.4.1)                           
+ GenomeInfoDb         * 1.14.0    2017-11-29 Bioconductor                             
+ GenomeInfoDbData       1.0.0     2018-01-09 Bioconductor                             
+ GenomicAlignments      1.14.1    2017-11-29 Bioconductor                             
+ GenomicFeatures        1.30.0    2017-11-29 Bioconductor                             
+ GenomicFiles           1.14.0    2017-11-29 Bioconductor                             
+ GenomicRanges        * 1.30.1    2018-01-09 Bioconductor                             
+ GEOquery               2.46.13   2018-01-09 Bioconductor                             
+ ggplot2                2.2.1     2016-12-30 CRAN (R 3.4.1)                           
+ glue                   1.2.0     2017-10-29 CRAN (R 3.4.2)                           
+ graphics             * 3.4.3     2018-01-20 local                                    
+ grDevices            * 3.4.3     2018-01-20 local                                    
+ grid                   3.4.3     2018-01-20 local                                    
+ gridExtra              2.3       2017-09-09 CRAN (R 3.4.1)                           
+ gtable                 0.2.0     2016-02-26 CRAN (R 3.4.1)                           
+ Hmisc                  4.1-1     2018-01-03 CRAN (R 3.4.2)                           
+ hms                    0.4.0     2017-11-23 CRAN (R 3.4.2)                           
+ htmlTable              1.11.1    2017-12-27 CRAN (R 3.4.2)                           
+ htmltools              0.3.6     2017-04-28 CRAN (R 3.4.1)                           
+ htmlwidgets            0.9       2017-07-10 CRAN (R 3.4.1)                           
+ httr                   1.3.1     2017-08-20 CRAN (R 3.4.1)                           
+ IRanges              * 2.12.0    2017-11-29 Bioconductor                             
+ iterators              1.0.9     2017-12-12 CRAN (R 3.4.2)                           
+ jaffelab             * 0.99.15   2017-10-27 Github (LieberInstitute/jaffelab@94307b0)
+ jsonlite               1.5       2017-06-01 CRAN (R 3.4.1)                           
+ knitr                  1.18      2017-12-27 CRAN (R 3.4.2)                           
+ lattice                0.20-35   2017-03-25 CRAN (R 3.4.3)                           
+ latticeExtra           0.6-28    2016-02-09 CRAN (R 3.4.1)                           
+ lazyeval               0.2.1     2017-10-29 CRAN (R 3.4.2)                           
+ limma                  3.34.5    2018-01-16 Bioconductor                             
+ locfit                 1.5-9.1   2013-04-20 CRAN (R 3.4.1)                           
+ magrittr               1.5       2014-11-22 CRAN (R 3.4.1)                           
+ Matrix                 1.2-12    2017-11-30 CRAN (R 3.4.3)                           
+ matrixStats          * 0.52.2    2017-04-14 CRAN (R 3.4.1)                           
+ memoise                1.1.0     2017-04-21 CRAN (R 3.4.1)                           
+ methods              * 3.4.3     2018-01-20 local                                    
+ munsell                0.4.3     2016-02-13 CRAN (R 3.4.1)                           
+ nnet                   7.3-12    2016-02-02 CRAN (R 3.4.3)                           
+ parallel             * 3.4.3     2018-01-20 local                                    
+ pillar                 1.1.0     2018-01-14 CRAN (R 3.4.2)                           
+ pkgconfig              2.0.1     2017-03-21 CRAN (R 3.4.1)                           
+ pkgmaker               0.22      2014-05-14 CRAN (R 3.4.1)                           
+ plyr                   1.8.4     2016-06-08 CRAN (R 3.4.1)                           
+ prettyunits            1.0.2     2015-07-13 CRAN (R 3.4.1)                           
+ progress               1.1.2     2016-12-14 CRAN (R 3.4.1)                           
+ purrr                  0.2.4     2017-10-18 CRAN (R 3.4.2)                           
+ qvalue                 2.10.0    2017-11-29 Bioconductor                             
+ R6                     2.2.2     2017-06-17 CRAN (R 3.4.1)                           
+ rafalib              * 1.0.0     2015-08-09 CRAN (R 3.4.1)                           
+ RColorBrewer           1.1-2     2014-12-07 CRAN (R 3.4.1)                           
+ Rcpp                   0.12.14   2017-11-23 CRAN (R 3.4.2)                           
+ RCurl                  1.95-4.10 2018-01-04 CRAN (R 3.4.2)                           
+ readr                  1.1.1     2017-05-16 CRAN (R 3.4.1)                           
+ readxl               * 1.0.0     2017-04-18 CRAN (R 3.4.1)                           
+ recount              * 1.4.3     2018-01-09 Bioconductor                             
+ registry               0.5       2017-12-03 CRAN (R 3.4.2)                           
+ rentrez                1.1.0     2017-06-01 CRAN (R 3.4.1)                           
+ reshape2               1.4.3     2017-12-11 CRAN (R 3.4.2)                           
+ rlang                  0.1.6     2017-12-21 CRAN (R 3.4.2)                           
+ RMySQL                 0.10.13   2017-08-14 CRAN (R 3.4.1)                           
+ rngtools               1.2.4     2014-03-06 CRAN (R 3.4.1)                           
+ rpart                  4.1-12    2018-01-12 CRAN (R 3.4.3)                           
+ Rsamtools              1.30.0    2017-11-29 Bioconductor                             
+ RSQLite                2.0       2017-06-19 CRAN (R 3.4.1)                           
+ rstudioapi             0.7       2017-09-07 CRAN (R 3.4.1)                           
+ rtracklayer            1.38.2    2018-01-09 Bioconductor                             
+ S4Vectors            * 0.16.0    2017-11-29 Bioconductor                             
+ scales                 0.5.0     2017-08-24 CRAN (R 3.4.1)                           
+ segmented              0.5-3.0   2017-11-30 CRAN (R 3.4.2)                           
+ splines                3.4.3     2018-01-20 local                                    
+ stats                * 3.4.3     2018-01-20 local                                    
+ stats4               * 3.4.3     2018-01-20 local                                    
+ stringi                1.1.6     2017-11-17 CRAN (R 3.4.2)                           
+ stringr                1.2.0     2017-02-18 CRAN (R 3.4.1)                           
+ SummarizedExperiment * 1.8.1     2018-01-09 Bioconductor                             
+ survival               2.41-3    2017-04-04 CRAN (R 3.4.3)                           
+ tibble                 1.4.1     2017-12-25 CRAN (R 3.4.2)                           
+ tidyr                  0.7.2     2017-10-16 CRAN (R 3.4.2)                           
+ tools                  3.4.3     2018-01-20 local                                    
+ utils                * 3.4.3     2018-01-20 local                                    
+ VariantAnnotation      1.24.5    2018-01-16 Bioconductor                             
+ withr                  2.1.1     2017-12-19 CRAN (R 3.4.2)                           
+ XML                    3.98-1.9  2017-06-19 CRAN (R 3.4.1)                           
+ xml2                   1.1.1     2017-01-24 CRAN (R 3.4.1)                           
+ xtable                 1.8-2     2016-02-05 CRAN (R 3.4.1)                           
+ XVector                0.18.0    2017-11-29 Bioconductor                             
+ zlibbioc               1.24.0    2017-11-07 Bioconductor                             
+**** Job ends ****
+Tue Jan 30 22:47:13 EST 2018
