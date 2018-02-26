@@ -1,5 +1,6 @@
 ## Ignore large files
 *.bw
+*.wig
 *_tmp
 
 

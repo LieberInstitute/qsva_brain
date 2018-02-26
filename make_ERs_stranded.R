@@ -1,17 +1,18 @@
 ## Based on /dcl01/lieber/ajaffe/lab/degradation_experiments/Joint/bipseq_sACC_Amygdala_RiboZero/make_ERs_stranded.R
 
 ###
-library(rtracklayer)
-library(derfinder)
-library(jaffelab)
-library(SummarizedExperiment)
-library(recount.bwtool)
-library(readxl)
-library(BiocParallel)
-library(limma)
-library(edgeR)
-library(biomaRt)
-library(GenomicRanges)
+library('rtracklayer')
+library('derfinder')
+library('jaffelab')
+library('SummarizedExperiment')
+library('recount.bwtool')
+library('readxl')
+library('BiocParallel')
+library('limma')
+library('edgeR')
+library('biomaRt')
+library('GenomicRanges')
+library('devtools')
 
 
 dir.create("bed")
@@ -168,13 +169,16 @@ ebInt = ebayes(fitInt)
 outInt = topTable(eBayes(fitInt),coef=c(2,8), n = nrow(covComb))
 outInt = outInt[rownames(out),]
 
+
+save(out, outInt, file = "rdas/DLPFC_Plus_HIPPO_RiboZero_ERlevel_degradationStats_forDEqual_hg38.rda")
+
 sum(p.adjust(ebInt$p[,8],"fdr") < 0.05) # good
 
-plot(outInt$F[out$, out$t)
+plot(outInt$F, out$t)
 
 ## write out
-dir.create("bed")
-digBed =rowRanges(covComb)[rownames(out)[1:1000]]
+dir.create("bed", showWarnings = FALSE)
+digBed =rowRanges(covComb)[head(rownames(out), n = 1000)]
 export(digBed, con = "bed/DLPFC_Plus_HIPPO_RiboZero_degradation_top1000.bed")
 
 #########################################
@@ -200,7 +204,10 @@ fitGeneInt = lmFit(vGeneInt)
 degradeStatsInt = topTable(eBayes(fitGeneInt),coef=2,
 	p.value = 1,number=nrow(rse_gene))
 
-save(degradeStats, file = "rdas/DLPFC_Plus_HIPPO_RiboZero_geneLevel_degradationStats_forDEqual_hg38.rda")
+save(degradeStats, degradeStatsInt, file = "rdas/DLPFC_Plus_HIPPO_RiboZero_geneLevel_degradationStats_forDEqual_hg38.rda")
 
 dev.off()
-
+Sys.time()
+proc.time()
+options(width = 120)
+session_info()
