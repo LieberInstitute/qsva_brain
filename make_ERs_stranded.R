@@ -1,5 +1,6 @@
-###
+## Based on /dcl01/lieber/ajaffe/lab/degradation_experiments/Joint/bipseq_sACC_Amygdala_RiboZero/make_ERs_stranded.R
 
+###
 library(rtracklayer)
 library(derfinder)
 library(jaffelab)
@@ -7,9 +8,21 @@ library(SummarizedExperiment)
 library(recount.bwtool)
 library(readxl)
 library(BiocParallel)
+library(limma)
+library(edgeR)
+library(biomaRt)
+library(GenomicRanges)
+
 
 dir.create("bed")
 dir.create("rdas")
+pdf('make_ERs_stranded.pdf')
+
+## read in phenotype data
+## subset by brain regions of interest, DLPFC and HIPPO
+load('/dcl01/ajaffe/data/lab/qsva_brain/expr_data/rda/rse_gene.Rdata')
+rse_gene <- rse_gene[, rse_gene$Region %in% c('DLPFC', 'HIPPO')]
+pd = colData(rse_gene)
 
 ## chromosome info
 chrInfo <- read.table('/dcl01/lieber/ajaffe/Emily/RNAseq-pipeline/Annotation/hg38.chrom.sizes.gencode',
@@ -17,7 +30,7 @@ chrInfo <- read.table('/dcl01/lieber/ajaffe/Emily/RNAseq-pipeline/Annotation/hg3
 chrInfo <- subset(chrInfo, chr %in% paste0('chr', c(1:22, 'X', 'Y', 'M')))
 
 ## load stranded mean bigwigs
-meanBWs = paste0("sACC_Amygdala_mean.",c("Forward","Reverse"), ".bw")
+meanBWs = paste0("mean_",c("forward","reverse"), ".bw")
 names(meanBWs) = c("Forward","Reverse")
 meanList = lapply(meanBWs, import)
 strand(meanList$Forward) = Rle("+")
@@ -32,20 +45,28 @@ erList = endoapply(reduceList, function(x)
 	x[width(x) >= 50 & seqnames(x) %in% chrInfo$chr])
 
 ##########################3
-## read in phenotype data
-pd = as.data.frame(read_excel(
-	"../../RIN_Amyg_sACC_degradation_20171003.xlsx",skip=3))
-colnames(pd)[8:9] = c("Region","DegradationTime")
+
 
 ## keep both regions
-man = read.delim("merged.manifest",as.is=TRUE, header=FALSE)	
-man$RNum = ss(man$V1,"_")
-pd$SampleID = man$V1[match(pd$RNum, man$RNum)]
+pd$RNum = ss(pd$SAMPLE_ID, "_")
 
 ## use recount bw tool	
-bwFilesForward = man$V2
-bwFilesReverse = man$V3
-names(bwFilesForward) =names(bwFilesReverse) = pd$SampleID
+
+bw_f_dlpfc <- paste0('/dcl01/lieber/ajaffe/lab/degradation_experiments/DLPFC_RiboZero/Coverage/', colData(rse_gene)$SAMPLE_ID[colData(rse_gene)$Region == 'DLPFC'], '.Forward.bw')
+
+bw_f_hippo <- paste0('/dcl01/lieber/ajaffe/lab/degradation_experiments/Hippo_RiboZero/Coverage/', colData(rse_gene)$SAMPLE_ID[colData(rse_gene)$Region == 'HIPPO'], '.Forward.bw')
+
+bw_f<- c(bw_f_dlpfc, bw_f_hippo)
+
+bwFilesForward = c(bw_f_dlpfc, bw_f_hippo)
+
+
+bw_r_dlpfc <- paste0('/dcl01/lieber/ajaffe/lab/degradation_experiments/DLPFC_RiboZero/Coverage/', colData(rse_gene)$SAMPLE_ID[colData(rse_gene)$Region == 'DLPFC'], '.Reverse.bw')
+
+bw_r_hippo <- paste0('/dcl01/lieber/ajaffe/lab/degradation_experiments/Hippo_RiboZero/Coverage/', colData(rse_gene)$SAMPLE_ID[colData(rse_gene)$Region == 'HIPPO'], '.Reverse.bw')
+
+bwFilesReverse = c(bw_r_dlpfc, bw_r_hippo)
+names(bwFilesForward) =names(bwFilesReverse) = c(colData(rse_gene)$SAMPLE_ID[colData(rse_gene)$Region == 'DLPFC'], colData(rse_gene)$SAMPLE_ID[colData(rse_gene)$Region == 'HIPPO'])
 all(file.exists(c(bwFilesForward, bwFilesReverse))) # TRUE
 
 ## get sums
@@ -77,17 +98,7 @@ rownames(covComb) = paste0(seqnames(covComb), ":",start(covComb), "-",
 ## annotate ###
 ###############
 
-library(biomaRt)
-library(GenomicRanges)
 
-## read in gene counts
-load("../../Amygdala_RiboZero/rse_gene_Amygdala_RiboZero_degradation_hg38_n20.Rdata")
-rse_gene_Amygdala = rse_gene
-rowData(rse_gene_Amygdala)$meanExprs = NULL
-load("../../sACC_RiboZero/rse_gene_sACC_RiboZero_degradation_hg38_n20.Rdata")
-rse_gene_sACC = rse_gene
-rowData(rse_gene_sACC)$meanExprs = NULL
-rse_gene = cbind(rse_gene_Amygdala, rse_gene_sACC)
 
 ## load genomic state
 load('/dcl01/lieber/ajaffe/Emily/RNAseq-pipeline/Annotation/gs/gs_gencode_v25_hg38.Rdata')
@@ -140,11 +151,7 @@ rowRanges(covComb)$annoClass[rowRanges(covComb)$exon > 0 &
 rowRanges(covComb)$annoClass[rowRanges(covComb)$exon > 0 & 
 	rowRanges(covComb)$intergenic > 0] = "extendUTR"
 	
-save(covComb, file = "rdas/expressedRegions_sACC_Plus_Amygdala_RiboZero_degradation_cut5_hg38_n40.rda")
-
-## make DIGs
-library(limma)
-library(edgeR)
+save(covComb, file = "rdas/expressedRegions_DLPFC_Plus_HIPPO_RiboZero_degradation_cut5_hg38_n40.rda")
 
 ## main model
 mod = model.matrix(~pd$DegradationTime +
@@ -168,7 +175,7 @@ plot(outInt$F[out$, out$t)
 ## write out
 dir.create("bed")
 digBed =rowRanges(covComb)[rownames(out)[1:1000]]
-export(digBed, con = "bed/sACC_Plus_Amygdala_RibZero_degradation_top1000.bed")
+export(digBed, con = "bed/DLPFC_Plus_HIPPO_RiboZero_degradation_top1000.bed")
 
 #########################################
 ## make degradation features for genes
@@ -188,10 +195,12 @@ degradeStats$bonf[degradeStats$AveExpr > -2] = p.adjust(degradeStats$P.Value[deg
 degradeStats = degradeStats[rownames(rse_gene),]
 
 ## add interaction p-value
-vGeneInt = voom(dge,modInt,plot=FALSE)
+vGeneInt = voom(dge,mod,plot=FALSE)
 fitGeneInt = lmFit(vGeneInt)
-ebGeneInt = ebayes(fitGeneInt)
-degradeStats$t_interaction = ebGeneInt$t[,8]
-degradeStats$P.Value_interaction = ebGeneInt$p[,8]
-	
-save(degradeStats, file = "rdas/sACC_Plus_Amygdala_RiboZero_geneLevel_degradationStats_forDEqual_hg38.rda")
+degradeStatsInt = topTable(eBayes(fitGeneInt),coef=2,
+	p.value = 1,number=nrow(rse_gene))
+
+save(degradeStats, file = "rdas/DLPFC_Plus_HIPPO_RiboZero_geneLevel_degradationStats_forDEqual_hg38.rda")
+
+dev.off()
+
