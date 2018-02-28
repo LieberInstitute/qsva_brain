@@ -3,11 +3,10 @@
 # Specify log file names
 #$ -o logs/make_ERs_stranded.txt
 #$ -e logs/make_ERs_stranded.txt
-#$ -pe local 8
+#$ -pe local 4
 #$ -m e
-#$ -l bluejay,mem_free=15G,h_vmem=15G,h_fsize=100G
+#$ -l bluejay,mem_free=50G,h_vmem=50G,h_fsize=100G
 #$ -N make_ERs_stranded
-#$ -hold_jid qsva_bws.sh
 
 echo "**** JHPCE info ****"
 echo "User: ${USER}"
