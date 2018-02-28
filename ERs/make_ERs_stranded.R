@@ -31,7 +31,7 @@ chrInfo <- read.table('/dcl01/lieber/ajaffe/Emily/RNAseq-pipeline/Annotation/hg3
 chrInfo <- subset(chrInfo, chr %in% paste0('chr', c(1:22, 'X', 'Y', 'M')))
 
 ## load stranded mean bigwigs
-meanBWs = paste0("mean_",c("forward","reverse"), ".bw")
+meanBWs = paste0("/dcl01/ajaffe/data/lab/qsva_brain/means/mean_",c("forward","reverse"), ".bw")
 names(meanBWs) = c("Forward","Reverse")
 stopifnot(all(file.exists(meanBWs)))
 meanList = lapply(meanBWs, function(x) {
