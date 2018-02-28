@@ -9,3 +9,4 @@
 
 ## Ignore log files
 logs
+.Rproj.user

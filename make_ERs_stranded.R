@@ -15,8 +15,8 @@ library('GenomicRanges')
 library('devtools')
 
 
-dir.create("bed")
-dir.create("rdas")
+dir.create("bed", showWarnings = FALSE)
+dir.create("rdas", showWarnings = FALSE)
 pdf('make_ERs_stranded.pdf')
 
 ## read in phenotype data
@@ -33,17 +33,25 @@ chrInfo <- subset(chrInfo, chr %in% paste0('chr', c(1:22, 'X', 'Y', 'M')))
 ## load stranded mean bigwigs
 meanBWs = paste0("mean_",c("forward","reverse"), ".bw")
 names(meanBWs) = c("Forward","Reverse")
-meanList = lapply(meanBWs, import)
+stopifnot(all(file.exists(meanBWs)))
+meanList = lapply(meanBWs, function(x) {
+    message(paste(Sys.time(), 'importing', x))
+    import(x)
+})
 strand(meanList$Forward) = Rle("+")
 strand(meanList$Reverse) = Rle("-")
 
 ## make ERs
+message(paste(Sys.time(), 'filtering mean BWs'))
 meanListFilter = GRangesList(lapply(meanList, function(x) x[abs(x$score) >= 5]))
 reduceList = endoapply(meanListFilter, reduce,min.gapwidth=2)
 
 ## at least 50 BP and on main chromosomes
-erList = endoapply(reduceList, function(x) 
+erList = endoapply(reduceList, function(x)
 	x[width(x) >= 50 & seqnames(x) %in% chrInfo$chr])
+
+## Clean up (to reduce mem burden)
+rm(meanList, meanListFilter, reduceList)
 
 ##########################3
 
@@ -51,7 +59,7 @@ erList = endoapply(reduceList, function(x)
 ## keep both regions
 pd$RNum = ss(pd$SAMPLE_ID, "_")
 
-## use recount bw tool	
+## use recount bw tool
 
 bw_f_dlpfc <- paste0('/dcl01/lieber/ajaffe/lab/degradation_experiments/DLPFC_RiboZero/Coverage/', colData(rse_gene)$SAMPLE_ID[colData(rse_gene)$Region == 'DLPFC'], '.Forward.bw')
 
@@ -68,12 +76,12 @@ bw_r_hippo <- paste0('/dcl01/lieber/ajaffe/lab/degradation_experiments/Hippo_Rib
 
 bwFilesReverse = c(bw_r_dlpfc, bw_r_hippo)
 names(bwFilesForward) =names(bwFilesReverse) = c(colData(rse_gene)$SAMPLE_ID[colData(rse_gene)$Region == 'DLPFC'], colData(rse_gene)$SAMPLE_ID[colData(rse_gene)$Region == 'HIPPO'])
-all(file.exists(c(bwFilesForward, bwFilesReverse))) # TRUE
+stopifnot(all(file.exists(c(bwFilesForward, bwFilesReverse))))
 
 ## get sums
-covForward = coverage_bwtool(bwFilesForward, erList$Forward, 
+covForward = coverage_bwtool(bwFilesForward, erList$Forward,
 	sumsdir = "ers", bpparam = MulticoreParam(4) ,strand = "+")
-covReverse = coverage_bwtool(bwFilesReverse, erList$Reverse, 
+covReverse = coverage_bwtool(bwFilesReverse, erList$Reverse,
 	sumsdir = "ers", bpparam = MulticoreParam(4), strand="-")
 
 covForward$bigwig_path = NULL
@@ -83,9 +91,9 @@ covReverse$bigwig_file = NULL
 
 ## divide by number of reads
 assays(covForward)$counts = assays(covForward)$counts/100 # divide by read length
-assays(covForward)$counts = abs(assays(covForward)$counts) 
+assays(covForward)$counts = abs(assays(covForward)$counts)
 assays(covReverse)$counts = assays(covReverse)$counts/100 # divide by read length
-assays(covReverse)$counts = abs(assays(covReverse)$counts) 
+assays(covReverse)$counts = abs(assays(covReverse)$counts)
 
 ## combine
 covComb = SummarizedExperiment(
@@ -123,12 +131,12 @@ new_intergenic <- lapply(c('+', '-'), function(str) {
 gs_stranded <- c(gs, unlist(GRangesList(new_intergenic)))
 
 ensemblAnno = annotateRegions(rowRanges(covComb),gs_stranded,ignore.strand=FALSE,minoverlap=1)
-countTable = ensemblAnno$countTable 
+countTable = ensemblAnno$countTable
 countTable[,2] = rowSums(countTable[,2:4])
 countTable = countTable[,c(1,2,5)]
 
 ## gene annotation overlaps
-geneMapGR = rowRanges(rse_gene) 
+geneMapGR = rowRanges(rse_gene)
 dA = distanceToNearest(rowRanges(covComb), geneMapGR)
 rowRanges(covComb)$nearestSymbol = geneMapGR$Symbol[subjectHits(dA)]
 rowRanges(covComb)$nearestID = names(geneMapGR)[subjectHits(dA)]
@@ -137,21 +145,21 @@ mcols(rowRanges(covComb)) = cbind(mcols(rowRanges(covComb)), countTable)
 
 ## add additional annotation
 rowRanges(covComb)$annoClass = NA
-rowRanges(covComb)$annoClass[rowRanges(covComb)$exon > 0 & 
+rowRanges(covComb)$annoClass[rowRanges(covComb)$exon > 0 &
 	rowRanges(covComb)$intron == 0 &
 	rowRanges(covComb)$intergenic == 0] = "strictExonic"
-rowRanges(covComb)$annoClass[rowRanges(covComb)$exon == 0 & 
+rowRanges(covComb)$annoClass[rowRanges(covComb)$exon == 0 &
 	rowRanges(covComb)$intron > 0 &
 	rowRanges(covComb)$intergenic == 0] = "strictIntronic"
-rowRanges(covComb)$annoClass[rowRanges(covComb)$exon == 0 & 
+rowRanges(covComb)$annoClass[rowRanges(covComb)$exon == 0 &
 	rowRanges(covComb)$intron == 0 &
 	rowRanges(covComb)$intergenic > 0] = "strictIntergenic"
-rowRanges(covComb)$annoClass[rowRanges(covComb)$exon > 0 & 
+rowRanges(covComb)$annoClass[rowRanges(covComb)$exon > 0 &
 	rowRanges(covComb)$intron > 0 &
 	rowRanges(covComb)$intergenic == 0] = "exonIntron"
-rowRanges(covComb)$annoClass[rowRanges(covComb)$exon > 0 & 
+rowRanges(covComb)$annoClass[rowRanges(covComb)$exon > 0 &
 	rowRanges(covComb)$intergenic > 0] = "extendUTR"
-	
+
 save(covComb, file = "rdas/expressedRegions_DLPFC_Plus_HIPPO_RiboZero_degradation_cut5_hg38_n40.rda")
 
 ## main model
@@ -162,7 +170,7 @@ eb = ebayes(fit)
 out = topTable(eBayes(fit),coef=2,n = nrow(covComb))
 
 ## interaction model
-modInt = model.matrix(~pd$DegradationTime*pd$Region + 
+modInt = model.matrix(~pd$DegradationTime*pd$Region +
 	factor(pd$BrNum))
 fitInt = lmFit(log2(assays(covComb)$counts+1), modInt)
 ebInt = ebayes(fitInt)
