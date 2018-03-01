@@ -186,7 +186,11 @@ sum(p.adjust(ebInt$p[, 2],"fdr") < 0.05)
 
 pdf('make_ERs_stranded.pdf')
 plot(outInt$F, out$t)
+plot(-log10(ebInt$p[, 2]), -log10(ebInt$p[, ncol(ebInt$p)]))
 dev.off()
+
+table(p.adjust(ebInt$p[head(rownames(out), n = 1000), ncol(ebInt$p)],"fdr") < 0.05)
+
 
 ## write out
 dir.create("bed", showWarnings = FALSE)
@@ -213,7 +217,7 @@ degradeStats = degradeStats[rownames(rse_gene),]
 ## add interaction p-value
 vGeneInt = voom(dge,modInt[, -(ncol(modInt) - 1)],plot=FALSE)
 fitGeneInt = lmFit(vGeneInt)
-degradeStatsInt = topTable(eBayes(fitGeneInt),coef=2,
+degradeStatsInt = topTable(eBayes(fitGeneInt),coef = (ncol(modInt) - 1),
 	p.value = 1,number=nrow(rse_gene))
 
 degradeStatsInt$bonf = NA
