@@ -17,7 +17,6 @@ library('devtools')
 
 dir.create("bed", showWarnings = FALSE)
 dir.create("rdas", showWarnings = FALSE)
-pdf('make_ERs_stranded.pdf')
 
 ## read in phenotype data
 ## subset by brain regions of interest, DLPFC and HIPPO
@@ -165,24 +164,27 @@ save(covComb, file = "rdas/expressedRegions_DLPFC_Plus_HIPPO_RiboZero_degradatio
 ## main model
 mod = model.matrix(~pd$DegradationTime +
 	pd$Region + factor(pd$BrNum))
-fit = lmFit(log2(assays(covComb)$counts+1), mod)
+## Drop dummy var for last BrNum, otherwise the model is not well specified
+fit = lmFit(log2(assays(covComb)$counts+1), mod[, -ncol(mod)])
 eb = ebayes(fit)
 out = topTable(eBayes(fit),coef=2,n = nrow(covComb))
 
 ## interaction model
 modInt = model.matrix(~pd$DegradationTime*pd$Region +
 	factor(pd$BrNum))
-fitInt = lmFit(log2(assays(covComb)$counts+1), modInt)
+fitInt = lmFit(log2(assays(covComb)$counts+1), modInt[, - (ncol(modInt) - 1)])
 ebInt = ebayes(fitInt)
-outInt = topTable(eBayes(fitInt),coef=c(2,8), n = nrow(covComb))
+outInt = topTable(eBayes(fitInt),coef=c(2, ncol(modInt) -1 ), n = nrow(covComb))
 outInt = outInt[rownames(out),]
 
 
 save(out, outInt, file = "rdas/DLPFC_Plus_HIPPO_RiboZero_ERlevel_degradationStats_forDEqual_hg38.rda")
 
-sum(p.adjust(ebInt$p[,8],"fdr") < 0.05) # good
+sum(p.adjust(ebInt$p[, ncol(ebInt$p)],"fdr") < 0.05) # good
 
+pdf('make_ERs_stranded.pdf')
 plot(outInt$F, out$t)
+dev.off()
 
 ## write out
 dir.create("bed", showWarnings = FALSE)
@@ -196,7 +198,7 @@ dge = DGEList(counts = assays(rse_gene)$counts,
 dge = calcNormFactors(dge)
 
 ## mean-variance
-vGene = voom(dge,mod,plot=FALSE)
+vGene = voom(dge,mod[, -ncol(mod)],plot=FALSE)
 fitGene = lmFit(vGene)
 ebGene = ebayes(fitGene)
 degradeStats = topTable(eBayes(fitGene),coef=2,
@@ -207,14 +209,18 @@ degradeStats$bonf[degradeStats$AveExpr > -2] = p.adjust(degradeStats$P.Value[deg
 degradeStats = degradeStats[rownames(rse_gene),]
 
 ## add interaction p-value
-vGeneInt = voom(dge,mod,plot=FALSE)
+vGeneInt = voom(dge,modInt[, -(ncol(modInt) - 1)],plot=FALSE)
 fitGeneInt = lmFit(vGeneInt)
 degradeStatsInt = topTable(eBayes(fitGeneInt),coef=2,
 	p.value = 1,number=nrow(rse_gene))
 
+degradeStatsInt$bonf = NA
+degradeStatsInt$bonf[degradeStatsInt$AveExpr > -2] = p.adjust(degradeStatsInt$P.Value[degradeStatsInt$AveExpr > -2] , "bonf")
+degradeStatsInt = degradeStatsInt[rownames(rse_gene),]
+
 save(degradeStats, degradeStatsInt, file = "rdas/DLPFC_Plus_HIPPO_RiboZero_geneLevel_degradationStats_forDEqual_hg38.rda")
 
-dev.off()
+
 Sys.time()
 proc.time()
 options(width = 120)
