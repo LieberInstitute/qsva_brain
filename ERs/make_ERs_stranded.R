@@ -181,6 +181,8 @@ outInt = outInt[rownames(out),]
 save(out, outInt, file = "rdas/DLPFC_Plus_HIPPO_RiboZero_ERlevel_degradationStats_forDEqual_hg38.rda")
 
 sum(p.adjust(ebInt$p[, ncol(ebInt$p)],"fdr") < 0.05) # good
+sum(p.adjust(eb$p[, 2],"fdr") < 0.05)
+sum(p.adjust(ebInt$p[, 2],"fdr") < 0.05)
 
 pdf('make_ERs_stranded.pdf')
 plot(outInt$F, out$t)
