@@ -80,9 +80,9 @@ stopifnot(all(file.exists(c(bwFilesForward, bwFilesReverse))))
 
 ## get sums
 covForward = coverage_bwtool(bwFilesForward, erList$Forward,
-	sumsdir = "ers", bpparam = MulticoreParam(4) ,strand = "+")
+	sumsdir = "ers", bpparam = MulticoreParam(1) ,strand = "+")
 covReverse = coverage_bwtool(bwFilesReverse, erList$Reverse,
-	sumsdir = "ers", bpparam = MulticoreParam(4), strand="-")
+	sumsdir = "ers", bpparam = MulticoreParam(1), strand="-")
 
 covForward$bigwig_path = NULL
 covForward$bigwig_file = NULL

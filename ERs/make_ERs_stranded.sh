@@ -3,9 +3,8 @@
 # Specify log file names
 #$ -o logs/make_ERs_stranded.txt
 #$ -e logs/make_ERs_stranded.txt
-#$ -pe local 4
 #$ -m e
-#$ -l bluejay,mem_free=25G,h_vmem=25G,h_fsize=100G
+#$ -l mem_free=200G,h_vmem=200G,h_fsize=100G
 #$ -N make_ERs_stranded
 
 echo "**** JHPCE info ****"
