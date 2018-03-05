@@ -10,13 +10,17 @@ load('rdas/degradation_rse_phase2_usingJoint.rda')
 
 n_samples <- elementNROWS(rse_gene$SAMPLE_ID)
 
-errdf <- do.call(rbind, lapply(2:4, function(n) {
+errdf <- do.call(rbind, lapply(2:max(n_samples), function(n) {
     n_i <- which(n_samples == n)
     do.call(rbind, lapply(n_i, function(i) {
         dat <- assays(cov_rse[, unlist(rse_gene$SAMPLE_ID[i]) ])$counts
         mean <- rowMeans(dat)
         err <- sweep(dat, 1, mean)
-        data.frame(rmse = sqrt(colMeans(err)^2), sample = colnames(err), n = n, i = i)
+        
+        err_first <- sweep(dat, 1, dat[, 1])
+        data.frame(rmse = sqrt(colMeans(err)^2),
+            rmse_first = sqrt(colMeans(err_first)^2),
+            sample = colnames(err), n = n, i = i)
     }))
 }))
 
@@ -25,8 +29,25 @@ dir.create('rdas', showWarnings = FALSE)
 save(errdf, file = 'rdas/errdf.Rdata')
 
 dir.create('pdf', showWarnings = FALSE)
+
+## For choosing ylim:
+round(with(errdf, max(c(rmse, rmse_first))))
+
 pdf('pdf/RMSE.pdf')
-ggplot(errdf, aes(x = as.factor(n), y = rmse)) + geom_boxplot() + theme_light(base_size = 18) + xlab('Number of replicates') + ylab('RMSE across all 1000 degradation ERs')
+set.seed(20180305)
+ggplot(errdf, aes(x = as.factor(n), y = rmse)) + geom_boxplot(outlier.shape = NA) + theme_light(base_size = 18) + xlab('Number of replicates') + ylab('RMSE vs mean top1k degradation ERs') + ylim(c(0, 200)) + geom_point(aes(fill = as.factor(n)), size = 2, shape = 21, position = position_jitterdodge(0.8)) + scale_fill_hue(l = '40', name = 'Replicates')
+
+ggplot(errdf, aes(x = as.factor(n), y = rmse_first)) + geom_boxplot(outlier.shape = NA) + theme_light(base_size = 18) + xlab('Number of replicates') + ylab('RMSE vs 1st top1k degradation ERs') + ylim(c(0, 200)) +  geom_point(aes(fill = as.factor(n)), size = 2, shape = 21, position = position_jitterdodge(0.8)) + scale_fill_hue(l = '40', name = 'Replicates')
+
+
+ggplot(subset(errdf, duplicated(i)), aes(x = as.factor(n), y = rmse)) + geom_boxplot(outlier.shape = NA) + theme_light(base_size = 18) + xlab('Number of replicates - exclude 1st') + ylab('RMSE vs mean top1k degradation ERs') + ylim(c(0, 200)) + geom_point(aes(fill = as.factor(n)), size = 2, shape = 21, position = position_jitterdodge(0.8)) + scale_fill_hue(l = '40', name = 'Replicates')
+
+ggplot(subset(errdf, duplicated(i)), aes(x = as.factor(n), y = rmse_first)) + geom_boxplot(outlier.shape = NA) + theme_light(base_size = 18) + xlab('Number of replicates - exclude 1st') + ylab('RMSE vs 1st top1k degradation ERs') + ylim(c(0, 200)) +  geom_point(aes(fill = as.factor(n)), size = 2, shape = 21, position = position_jitterdodge(0.8)) + scale_fill_hue(l = '40', name = 'Replicates')
+
+ggplot(errdf, aes(colour = as.factor(n), y = rmse, x = rmse_first)) + geom_point() + theme_light(base_size = 18) + ylab('RMSE vs mean top1k degradation ERs') + xlab('RMSE vs 1st top1k degradation ERs') + scale_colour_hue(l = '40', name = 'Replicates') + geom_abline(intercept = 0, slope =1, color = 'orange', size = 1.5, linetype = 'dashed')
+
+ggplot(subset(errdf, duplicated(i)), aes(colour = as.factor(n), y = rmse, x = rmse_first)) + geom_point() + theme_light(base_size = 18) + ylab('RMSE vs mean top1k degradation ERs') + xlab('RMSE vs 1st top1k degradation ERs') + scale_colour_hue(l = '40', name = 'Replicates') + geom_abline(intercept = 0, slope =1, color = 'orange', size = 1.5, linetype = 'dashed')
+
 dev.off()
 
 ## Reproducibility information
