@@ -28,6 +28,18 @@ dim(errdf)
 dir.create('rdas', showWarnings = FALSE)
 save(errdf, file = 'rdas/errdf.Rdata')
 
+## Summarize further
+dup <- duplicated(errdf$i)
+mean_err <- data.frame(
+    rmse = with(errdf, tapply(rmse, i, mean)),
+    rmse_first = with(errdf, tapply(rmse_first, i, mean)),
+    sample = errdf$sample[!dup],
+    n = errdf$n[!dup],
+    i = errdf$i[!dup]
+)
+with(mean_err, summary(rmse - rmse_first))
+dim(mean_err)
+
 dir.create('pdf', showWarnings = FALSE)
 
 ## For choosing ylim:
@@ -47,6 +59,8 @@ ggplot(subset(errdf, duplicated(i)), aes(x = as.factor(n), y = rmse_first)) + ge
 ggplot(errdf, aes(colour = as.factor(n), y = rmse, x = rmse_first)) + geom_point() + theme_light(base_size = 18) + ylab('RMSE vs mean top1k degradation ERs') + xlab('RMSE vs 1st top1k degradation ERs') + scale_colour_hue(l = '40', name = 'Replicates') + geom_abline(intercept = 0, slope =1, color = 'orange', size = 1.5, linetype = 'dashed')
 
 ggplot(subset(errdf, duplicated(i)), aes(colour = as.factor(n), y = rmse, x = rmse_first)) + geom_point() + theme_light(base_size = 18) + ylab('RMSE vs mean top1k degradation ERs') + xlab('RMSE vs 1st top1k degradation ERs') + scale_colour_hue(l = '40', name = 'Replicates') + geom_abline(intercept = 0, slope =1, color = 'orange', size = 1.5, linetype = 'dashed')
+
+ggplot(mean_err, aes(colour = as.factor(n), y = rmse, x = rmse_first)) + geom_point() + theme_light(base_size = 18) + ylab('mean RMSE vs mean top1k degradation ERs') + xlab('mean RMSE vs 1st top1k degradation ERs') + scale_colour_hue(l = '40', name = 'Replicates') + geom_abline(intercept = 0, slope =1, color = 'grey80', size = 0.5, linetype = 'dashed')
 
 dev.off()
 
