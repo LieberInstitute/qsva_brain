@@ -49,6 +49,46 @@ assays(cov_rse)$counts = abs(assays(cov_rse)$counts)
 dir.create('rdas', showWarnings = FALSE)
 save(cov_rse, file = 'rdas/degradation_rse_phase2_usingJoint.rda')
 
+
+
+
+
+### Just using the 1st sample if there are replicates
+region_dir <- ifelse(rse_gene$Region == 'DLPFC', 'DLPFC', 'Hippo')
+region_path <- paste0('/dcl01/lieber/ajaffe/lab/brainseq_phase2/preprocessed_data/', region_dir, '_RiboZero/Coverage/')
+
+forwardBw = paste0(region_path, sapply(rse_gene$SAMPLE_ID, '[', 1), ".Forward.bw")
+reverseBw = paste0(region_path, sapply(rse_gene$SAMPLE_ID, '[', 1), ".Reverse.bw")
+
+stopifnot(all(file.exists(c(forwardBw,reverseBw))))
+
+names(forwardBw) = names(reverseBw) = sapply(rse_gene$SAMPLE_ID, '[', 1)
+
+
+covForward = coverage_bwtool(forwardBw, regs, strand = "+", 
+	sumsdir = "degradation", bpparam = MulticoreParam(8))
+covForward$bigwig_path = NULL
+covForward$bigwig_file = NULL
+
+covReverse = coverage_bwtool(reverseBw, regs, strand = "-", 
+	sumsdir = "degradation", bpparam = MulticoreParam(8))
+covReverse$bigwig_path = NULL
+covReverse$bigwig_file = NULL
+
+## combine
+cov_rse = rbind(covForward, covReverse)	
+rownames(cov_rse) = rowData(cov_rse)$name
+cov_rse = cov_rse[regs$name,]
+
+## divide by number of reads
+assays(cov_rse)$counts = assays(cov_rse)$counts/100 # divide by read length
+
+## make positive
+assays(cov_rse)$counts = abs(assays(cov_rse)$counts) 
+
+dir.create('rdas', showWarnings = FALSE)
+save(cov_rse, file = 'rdas/degradation_rse_phase2_usingJoint_justFirst.rda')
+
 ## Reproducibility information
 print('Reproducibility information:')
 Sys.time()
