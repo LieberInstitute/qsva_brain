@@ -18,15 +18,29 @@ pd = colData(rse_gene)
 pca = prcomp(t(log2(geneRpkm+1)))
 # percent of variance explained by pcas
 pcaVars = getPcaVars(pca)
+getPcaVars(pca)[1:5]
 
-## check output
+## degradation plots
 dir.create('pdf', showWarnings = FALSE)
 pdf('pdf/degradation.pdf')
-plot(pca$x[,1] ~ pd$totalAssignedGene)
-plot(pca$x[,1] ~ factor(pd$Region))
-plot(pca$x[,2] ~ factor(pd$Region))
-plot(pca$x[,1] ~ pd$RIN)
-plot(pca$x[,1] ~ pd$mitoRate)
+plot(pca$x[,1] ~ pd$totalAssignedGene,
+     xlab = "Gene Assignment Rate", pch=20,
+     ylab=paste0("pca1: ",getPcaVars(pca)[1],"% Var Expl"), col = c('orange', 'skyblue3')[factor(pd$Region)])
+legend('topright', c('DLPFC', 'HIPPO'), lwd = 2, col = c('dark orange', 'skyblue3'), bty = 'n')
+plot(pca$x[,1] ~ factor(pd$Region),
+     xlab = "Region",
+     ylab=paste0("pca1: ",getPcaVars(pca)[1],"% Var Expl"))
+plot(pca$x[,2] ~ factor(pd$Region),
+     xlab = "Region",
+     ylab=paste0("pca2: ",getPcaVars(pca)[2],"% Var Expl"))
+plot(pca$x[,1] ~ pd$RIN,
+     xlab = "RIN", pch=20,
+     ylab=paste0("pca1: ",getPcaVars(pca)[1],"% Var Expl"), col = c('orange', 'skyblue3')[factor(pd$Region)])
+legend('topright', c('DLPFC', 'HIPPO'), lwd = 2, col = c('dark orange', 'skyblue3'), bty = 'n')
+plot(pca$x[,1] ~ pd$mitoRate,
+     xlab = "mitoRate", pch=20,
+     ylab=paste0("pca1: ",getPcaVars(pca)[1],"% Var Expl"), col = c('orange', 'skyblue3')[factor(pd$Region)])
+legend('topright', c('DLPFC', 'HIPPO'), lwd = 2, col = c('dark orange', 'skyblue3'), bty = 'n')
 dev.off()
 
 
@@ -52,17 +66,32 @@ pd$Dx = relevel(pd$Dx, "Control")
 pca = prcomp(t(log2(geneRpkm+1)))
 # percent of variance explained by pcas
 pcaVars = getPcaVars(pca)
+getPcaVars(pca)[1:5]
 
-## check output
+## brainseq plots
 pdf('pdf/brainseqplots.pdf')
-plot(pca$x[,1] ~ pd$totalAssignedGene)
-plot(pca$x[,1] ~ pd$RIN)
-plot(pca$x[,1] ~ pd$mitoRate)
-plot(pca$x[,2] ~ pd$mitoRate)
-plot(pca$x[,1] ~ factor(pd$Region))
-plot(pca$x[,1] ~ pd$Dx)
-plot(pca$x[,1] ~ factor(pd$Kit))
-plot(pca$x[,1] ~ pd$totalAssignedGene, col = c('orange', 'light blue')[factor(pd$Kit)], pch = 21)
+plot(pca$x[,1] ~ pd$totalAssignedGene,
+     xlab = "Gene Assignment Rate", pch=20,
+     ylab=paste0("pca1: ",getPcaVars(pca)[1],"% Var Expl"), col = c('orange', 'skyblue3')[factor(pd$Region)])
+legend('topleft', c('DLPFC', 'HIPPO'), lwd = 2, col = c('dark orange', 'skyblue3'), bty = 'n')
+plot(pca$x[,1] ~ pd$RIN,
+     xlab = "RIN", pch=20,
+     ylab=paste0("pca1: ",getPcaVars(pca)[1],"% Var Expl"), col = c('orange', 'skyblue3')[factor(pd$Region)])
+legend('topright', c('DLPFC', 'HIPPO'), lwd = 2, col = c('dark orange', 'skyblue3'), bty = 'n')
+plot(pca$x[,1] ~ pd$mitoRate,
+     xlab = "mitoRate", pch=20,
+     ylab=paste0("pca1: ",getPcaVars(pca)[1],"% Var Expl"), col = c('orange', 'skyblue3')[factor(pd$Region)])
+legend('topleft', c('DLPFC', 'HIPPO'), lwd = 2, col = c('dark orange', 'skyblue3'), bty = 'n')
+plot(pca$x[,2] ~ pd$mitoRate,
+     xlab = "mitoRate", pch=20,
+     ylab=paste0("pca2: ",getPcaVars(pca)[2],"% Var Expl"), col = c('orange', 'skyblue3')[factor(pd$Region)])
+legend('topright', c('DLPFC', 'HIPPO'), lwd = 2, col = c('dark orange', 'skyblue3'), bty = 'n')
+plot(pca$x[,1] ~ factor(pd$Region),
+     xlab = "Region", 
+     ylab=paste0("pca1: ",getPcaVars(pca)[1],"% Var Expl"))
+plot(pca$x[,1] ~ pd$Dx,
+     xlab = "Dx", 
+     ylab=paste0("pca1: ",getPcaVars(pca)[1],"% Var Expl"))
 dev.off()
 
 
@@ -73,28 +102,37 @@ load("/dcl01/ajaffe/data/lab/qsva_brain/brainseq_phase2_qsv/rdas/degradation_rse
 qsvBonf = prcomp(t(log2(assays(cov_rse)$counts+1)))
 getPcaVars(qsvBonf)[1:5]
 
+## brainseq qsv plots
 pdf("pdf/qSVs_brainseq.pdf")
 mypar(2,2)
-#1st qsv across all 900 samples
 plot(qsvBonf$x[,1] ~ pd$totalAssignedGene,
-     xlab = "Gene Assignment Rate",pch=19,
-     ylab=paste0("qSV1: ",getPcaVars(qsvBonf)[1],"% Var Expl"), col = c('orange', 'light blue')[c('Gold' = 1, 'HMR' = 2)[pd$Kit]])
-
+     xlab = "Gene Assignment Rate",pch=20,
+     ylab=paste0("qSV1: ",getPcaVars(qsvBonf)[1],"% Var Expl"), col = c('orange', 'skyblue3')[factor(pd$Region)])
+legend('topleft', c('DLPFC', 'HIPPO'), lwd = 2, col = c('dark orange', 'skyblue3'), bty = 'n')
 plot(qsvBonf$x[,1] ~ pd$Dx,
-     xlab = "Dx",	ylab=paste0("qSV1: ",getPcaVars(qsvBonf)[1],"% Var Expl"))
+     xlab = "Diagnosis",	ylab=paste0("qSV1: ",getPcaVars(qsvBonf)[1],"% Var Expl"))
 plot(qsvBonf$x[,1] ~ factor(pd$Region),
      xlab = "Region",	ylab=paste0("qSV1: ",getPcaVars(qsvBonf)[1],"% Var Expl"))
 plot(qsvBonf$x[,1] ~ pd$RIN,
-     xlab = "RIN",	ylab=paste0("qSV1: ",getPcaVars(qsvBonf)[1],"% Var Expl"))
+     xlab = "RIN",pch=20,
+     ylab=paste0("qSV1: ",getPcaVars(qsvBonf)[1],"% Var Expl"), col = c('orange', 'skyblue3')[factor(pd$Region)])
+legend('topleft', c('DLPFC', 'HIPPO'), lwd = 2, col = c('dark orange', 'skyblue3'), bty = 'n')
 plot(qsvBonf$x[,1] ~ pd$mitoRate,
-     xlab = "mitoRate",	ylab=paste0("qSV1: ",getPcaVars(qsvBonf)[1],"% Var Expl"))
+     xlab = "mitoRate",pch=20,
+     ylab=paste0("qSV1: ",getPcaVars(qsvBonf)[1],"% Var Expl"), col = c('orange', 'skyblue3')[factor(pd$Region)])
+legend('topright', c('DLPFC', 'HIPPO'), lwd = 2, col = c('dark orange', 'skyblue3'), bty = 'n')
 plot(qsvBonf$x[,2] ~ pd$mitoRate,
-     xlab = "mitoRate",	ylab=paste0("qSV2: ",getPcaVars(qsvBonf)[2],"% Var Expl"))
-     
+     xlab = "mitoRate",pch=20,
+     ylab=paste0("qSV2: ",getPcaVars(qsvBonf)[2],"% Var Expl"), col = c('orange', 'skyblue3')[factor(pd$Region)])
+legend('topright', c('DLPFC', 'HIPPO'), lwd = 2, col = c('dark orange', 'skyblue3'), bty = 'n')
 plot(qsvBonf$x[,1] ~ pd$Age,
-     xlab = "Age",	ylab=paste0("qSV1: ",getPcaVars(qsvBonf)[1],"% Var Expl"))
+     xlab = "Age",pch=20,
+     ylab=paste0("qSV1: ",getPcaVars(qsvBonf)[1],"% Var Expl"), col = c('orange', 'skyblue3')[factor(pd$Region)])
+legend('topright', c('DLPFC', 'HIPPO'), lwd = 2, col = c('dark orange', 'skyblue3'), bty = 'n')
 plot(qsvBonf$x[,2] ~ pd$Age,
-     xlab = "Age",	ylab=paste0("qSV2: ",getPcaVars(qsvBonf)[2],"% Var Expl"))
+     xlab = "Age",pch=20,
+     ylab=paste0("qSV2: ",getPcaVars(qsvBonf)[2],"% Var Expl"), col = c('orange', 'skyblue3')[factor(pd$Region)])
+legend('topright', c('DLPFC', 'HIPPO'), lwd = 2, col = c('dark orange', 'skyblue3'), bty = 'n')
      
 dev.off()
 
@@ -119,66 +157,68 @@ summary(lm(qsvBonf$x[,1] ~ pd$totalAssignedGene))
 # Multiple R-squared:  0.004363,	Adjusted R-squared:  0.003254
 # F-statistic: 3.935 on 1 and 898 DF,  p-value: 0.0476
 
-print('Regression: qsv1 vs Kit')
-summary(lm(qsvBonf$x[,1] ~ pd$Kit))
+print('Regression: qsv1 vs Region')
+summary(lm(qsvBonf$x[,1] ~ pd$Region))
 # Call:
-# lm(formula = qsvBonf$x[, 1] ~ pd$Kit)
-#
+# lm(formula = qsvBonf$x[, 1] ~ pd$Region)
+# 
 # Residuals:
-#    Min      1Q  Median      3Q     Max 
-# -49.085  -8.018   2.924  10.951  33.340 
-#
+#     Min      1Q  Median      3Q     Max 
+# -49.716  -7.472   2.994  10.634  32.709 
+# 
 # Coefficients:
-#            Estimate Std. Error t value Pr(>|t|)    
-# (Intercept)   8.3864     0.6668   12.58   <2e-16 ***
-# pd$KitHMR   -18.4543     0.9892  -18.66   <2e-16 ***
+#                Estimate Std. Error t value Pr(>|t|)    
+# (Intercept)      9.0177     0.6974   12.93   <2e-16 ***
+# pd$RegionHIPPO -18.1564     0.9896  -18.35   <2e-16 ***
 # ---
 # Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
-#
-# Residual standard error: 14.78 on 898 degrees of freedom
-# Multiple R-squared:  0.2793,	Adjusted R-squared:  0.2785 
-# F-statistic: 348.1 on 1 and 898 DF,  p-value: < 2.2e-16
+# 
+# Residual standard error: 14.84 on 898 degrees of freedom
+# Multiple R-squared:  0.2726,	Adjusted R-squared:  0.2718 
+# F-statistic: 336.6 on 1 and 898 DF,  p-value: < 2.2e-16
 
-print('Regression: qsv1 vs totalAssigned + Kit')
-summary(lm(qsvBonf$x[,1] ~ pd$totalAssignedGene + pd$Kit))
+print('Regression: qsv1 vs totalAssignedGene + Region')
+summary(lm(qsvBonf$x[,1] ~ pd$totalAssignedGene + pd$Region))
 # Call:
-# lm(formula = qsvBonf$x[, 1] ~ pd$totalAssignedGene + pd$Kit)
-#
+# lm(formula = qsvBonf$x[, 1] ~ pd$totalAssignedGene + pd$Region)
+# 
 # Residuals:
-#    Min      1Q  Median      3Q     Max 
-# -63.119  -5.670   2.514   7.340  36.036 
-#
+#     Min      1Q  Median      3Q     Max 
+# -59.545  -6.375   2.574   8.577  33.261 
+# 
 # Coefficients:
-#                     Estimate Std. Error t value Pr(>|t|)    
-# (Intercept)           -46.659      3.311  -14.09   <2e-16 ***
-# pd$totalAssignedGene  135.466      8.023   16.89   <2e-16 ***
-# pd$KitHMR             -32.463      1.196  -27.13   <2e-16 ***
+#                      Estimate Std. Error t value Pr(>|t|)    
+# (Intercept)           -29.994      3.255  -9.214   <2e-16 ***
+# pd$totalAssignedGene   95.604      7.819  12.227   <2e-16 ***
+# pd$RegionHIPPO        -26.873      1.161 -23.140   <2e-16 ***
 # ---
 # Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
-#
-# Residual standard error: 12.88 on 897 degrees of freedom
-# Multiple R-squared:  0.4531,	Adjusted R-squared:  0.4519 
-# F-statistic: 371.6 on 2 and 897 DF,  p-value: < 2.2e-16
+# 
+# Residual standard error: 13.75 on 897 degrees of freedom
+# Multiple R-squared:  0.3765,	Adjusted R-squared:  0.3752 
+# F-statistic: 270.9 on 2 and 897 DF,  p-value: < 2.2e-16
 
-print('Regression: qsv1 vs totalAssigned*Kit')
-summary(lm(qsvBonf$x[,1] ~ pd$totalAssignedGene * pd$Kit))
+print('Regression: qsv1 vs totalAssignedGene*Region')
+summary(lm(qsvBonf$x[,1] ~ pd$totalAssignedGene * pd$Region))
 # Call:
-# lm(formula = qsvBonf$x[, 1] ~ pd$Dx)
+# lm(formula = qsvBonf$x[, 1] ~ pd$totalAssignedGene * pd$Region)
 # 
 # Residuals:
-#    Min      1Q  Median      3Q     Max
-# -56.723 -10.200   1.171  12.296  39.468
+#     Min      1Q  Median      3Q     Max 
+# -46.857  -5.155   1.868   7.036  39.507 
 # 
 # Coefficients:
-#            Estimate Std. Error t value Pr(>|t|)
-# (Intercept)   2.2592     0.6896   3.276  0.00109 **
-# pd$DxSchizo  -7.1092     1.2233  -5.812 8.59e-09 ***
+#                                     Estimate Std. Error t value Pr(>|t|)    
+# (Intercept)                          -79.199      4.367  -18.14   <2e-16 ***
+# pd$totalAssignedGene                 216.190     10.608   20.38   <2e-16 ***
+# pd$RegionHIPPO                        68.409      6.393   10.70   <2e-16 ***
+# pd$totalAssignedGene:pd$RegionHIPPO -212.882     14.094  -15.10   <2e-16 ***
 # ---
 # Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 # 
-# Residual standard error: 17.09 on 898 degrees of freedom
-# Multiple R-squared:  0.03625,	Adjusted R-squared:  0.03518
-# F-statistic: 33.78 on 1 and 898 DF,  p-value: 8.586e-09
+# Residual standard error: 12.28 on 896 degrees of freedom
+# Multiple R-squared:  0.5031,	Adjusted R-squared:  0.5014 
+# F-statistic: 302.4 on 3 and 896 DF,  p-value: < 2.2e-16
 
 print('Regression: qsv1 vs Dx')
 summary(lm(qsvBonf$x[,1] ~ pd$Dx))
@@ -241,43 +281,39 @@ summary(lm(qsvBonf$x[,1] ~ pd$Dx + pd$totalAssignedGene))
 # Multiple R-squared:  0.04139,	Adjusted R-squared:  0.03925 
 # F-statistic: 19.36 on 2 and 897 DF,  p-value: 5.84e-09
 
-print('Regression: qsv1 vs totalAssigned*Kit*Dx')
-summary(lm(qsvBonf$x[,1] ~ pd$totalAssignedGene * pd$Kit * pd$Dx))
+print('Regression: qsv1 vs totalAssignedGene*Region*Dx')
+summary(lm(qsvBonf$x[,1] ~ pd$totalAssignedGene * pd$Region * pd$Dx))
 # Call:
-# lm(formula = qsvBonf$x[, 1] ~ pd$totalAssignedGene * pd$Kit * 
-#    pd$Dx)
-#
+# lm(formula = qsvBonf$x[, 1] ~ pd$totalAssignedGene * pd$Region * 
+#     pd$Dx)
+# 
 # Residuals:
-#    Min      1Q  Median      3Q     Max 
-# -50.785  -5.273   1.711   6.804  45.280 
-#
+#     Min      1Q  Median      3Q     Max 
+# -48.162  -5.243   1.759   6.700  45.791 
+# 
 # Coefficients:
-#                                           Estimate Std. Error t value Pr(>|t|)
-# (Intercept)                                 -76.957      4.794 -16.054  < 2e-16
-# pd$totalAssignedGene                        210.873     11.587  18.200  < 2e-16
-# pd$KitHMR                                    58.966      7.635   7.723 3.05e-14
-# pd$DxSchizo                                 -14.179      8.964  -1.582   0.1141
-# pd$totalAssignedGene:pd$KitHMR             -188.785     16.380 -11.525  < 2e-16
-# pd$totalAssignedGene:pd$DxSchizo             32.870     22.174   1.482   0.1386
-# pd$KitHMR:pd$DxSchizo                       -42.810     15.946  -2.685   0.0074
-# pd$totalAssignedGene:pd$KitHMR:pd$DxSchizo   58.970     33.995   1.735   0.0831
-                                              
-# (Intercept)                                ***
-# pd$totalAssignedGene                       ***
-# pd$KitHMR                                  ***
-# pd$DxSchizo                                   
-# pd$totalAssignedGene:pd$KitHMR             ***
-# pd$totalAssignedGene:pd$DxSchizo              
-# pd$KitHMR:pd$DxSchizo                      ** 
-# pd$totalAssignedGene:pd$KitHMR:pd$DxSchizo .  
+#                                                 Estimate Std. Error t value
+# (Intercept)                                      -72.657      4.969 -14.621
+# pd$totalAssignedGene                             201.743     11.908  16.941
+# pd$RegionHIPPO                                    68.190      6.852   9.952
+# pd$DxSchizo                                      -19.485      9.128  -2.135
+# pd$totalAssignedGene:pd$RegionHIPPO             -204.575     15.203 -13.456
+# pd$totalAssignedGene:pd$DxSchizo                  44.212     22.528   1.963
+# pd$RegionHIPPO:pd$DxSchizo                       -54.842     16.247  -3.376
+# pd$totalAssignedGene:pd$RegionHIPPO:pd$DxSchizo   79.862     34.640   2.305
+#                                                 Pr(>|t|)    
+# (Intercept)                                      < 2e-16 ***
+# pd$totalAssignedGene                             < 2e-16 ***
+# pd$RegionHIPPO                                   < 2e-16 ***
+# pd$DxSchizo                                     0.033060 *  
+# pd$totalAssignedGene:pd$RegionHIPPO              < 2e-16 ***
+# pd$totalAssignedGene:pd$DxSchizo                0.050012 .  
+# pd$RegionHIPPO:pd$DxSchizo                      0.000768 ***
+# pd$totalAssignedGene:pd$RegionHIPPO:pd$DxSchizo 0.021370 *  
 # ---
 # Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
-#
-# Residual standard error: 11.43 on 892 degrees of freedom
-# Multiple R-squared:  0.5716,	Adjusted R-squared:  0.5682 
-# F-statistic:   170 on 7 and 892 DF,  p-value: < 2.2e-16
-
-
-
-
+# 
+# Residual standard error: 11.59 on 892 degrees of freedom
+# Multiple R-squared:  0.5596,	Adjusted R-squared:  0.5561 
+# F-statistic: 161.9 on 7 and 892 DF,  p-value: < 2.2e-16
 
