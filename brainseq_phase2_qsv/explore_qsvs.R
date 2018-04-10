@@ -19,6 +19,7 @@ pca = prcomp(t(log2(geneRpkm+1)))
 # percent of variance explained by pcas
 pcaVars = getPcaVars(pca)
 getPcaVars(pca)[1:5]
+# [1] 26.60 12.90  6.10  5.81  3.82
 
 ## degradation plots
 dir.create('pdf', showWarnings = FALSE)
@@ -41,8 +42,11 @@ plot(pca$x[,1] ~ pd$mitoRate,
      xlab = "mitoRate", pch=20,
      ylab=paste0("pca1: ",getPcaVars(pca)[1],"% Var Expl"), col = c('orange', 'skyblue3')[factor(pd$Region)])
 legend('topright', c('DLPFC', 'HIPPO'), lwd = 2, col = c('dark orange', 'skyblue3'), bty = 'n')
+plot(pca$x[,1] ~ pd$rRNA_rate,
+     xlab = "rRNA Rate", pch=20,
+     ylab=paste0("pca1: ",getPcaVars(pca)[1],"% Var Expl"), col = c('orange', 'skyblue3')[factor(pd$Region)])
+legend('topright', c('DLPFC', 'HIPPO'), lwd = 2, col = c('dark orange', 'skyblue3'), bty = 'n')
 dev.off()
-
 
 
 load("/dcl01/lieber/ajaffe/lab/brainseq_phase2/expr_cutoff/rse_gene.Rdata", verbose = TRUE)
@@ -53,20 +57,22 @@ colData(rse_gene)$mitoRate = sapply(colData(rse_gene)$mitoRate,mean)
 colData(rse_gene)$overallMapRate = sapply(colData(rse_gene)$overallMapRate, mean)
 colData(rse_gene)$rRNA_rate = sapply(colData(rse_gene)$rRNA_rate,mean)
 colData(rse_gene)$ERCCsumLogErr = sapply(colData(rse_gene)$ERCCsumLogErr,mean)
-colData(rse_gene)$Kit = ifelse(colData(rse_gene)$mitoRate < 0.05, "Gold", "HMR")
+# Kit definition previously used only applicable to HIPPO not DLPFC  
+# colData(rse_gene)$Kit = ifelse(colData(rse_gene)$mitoRate < 0.05, "Gold", "HMR")
 
 geneRpkm = getRPKM(rse_gene, length="Length")
 pd = colData(rse_gene)
 pd$Dx = factor(pd$Dx)
 pd$Dx = relevel(pd$Dx, "Control")
-
-
+pd$Sex = factor(pd$Sex)
+pd$Sex = relevel(pd$Sex, "M")
 
 # do pca on genes
 pca = prcomp(t(log2(geneRpkm+1)))
 # percent of variance explained by pcas
 pcaVars = getPcaVars(pca)
 getPcaVars(pca)[1:5]
+# [1] 33.50 17.90  6.17  4.65  2.75
 
 ## brainseq plots
 pdf('pdf/brainseqplots.pdf')
@@ -86,11 +92,18 @@ plot(pca$x[,2] ~ pd$mitoRate,
      xlab = "mitoRate", pch=20,
      ylab=paste0("pca2: ",getPcaVars(pca)[2],"% Var Expl"), col = c('orange', 'skyblue3')[factor(pd$Region)])
 legend('topright', c('DLPFC', 'HIPPO'), lwd = 2, col = c('dark orange', 'skyblue3'), bty = 'n')
+plot(pca$x[,1] ~ pd$rRNA_rate,
+     xlab = "rRNA Rate", pch=20,
+     ylab=paste0("pca1: ",getPcaVars(pca)[1],"% Var Expl"), col = c('orange', 'skyblue3')[factor(pd$Region)])
+legend('topright', c('DLPFC', 'HIPPO'), lwd = 2, col = c('dark orange', 'skyblue3'), bty = 'n')
 plot(pca$x[,1] ~ factor(pd$Region),
      xlab = "Region", 
      ylab=paste0("pca1: ",getPcaVars(pca)[1],"% Var Expl"))
 plot(pca$x[,1] ~ pd$Dx,
      xlab = "Dx", 
+     ylab=paste0("pca1: ",getPcaVars(pca)[1],"% Var Expl"))
+plot(pca$x[,1] ~ pd$Sex,
+     xlab = "Sex", 
      ylab=paste0("pca1: ",getPcaVars(pca)[1],"% Var Expl"))
 dev.off()
 
@@ -101,10 +114,10 @@ load("/dcl01/ajaffe/data/lab/qsva_brain/brainseq_phase2_qsv/rdas/degradation_rse
 ## get qSVs for top bonferroni
 qsvBonf = prcomp(t(log2(assays(cov_rse)$counts+1)))
 getPcaVars(qsvBonf)[1:5]
+# [1] 57.80 15.70  3.36  2.70  2.36
 
 ## brainseq qsv plots
 pdf("pdf/qSVs_brainseq.pdf")
-mypar(2,2)
 plot(qsvBonf$x[,1] ~ pd$totalAssignedGene,
      xlab = "Gene Assignment Rate",pch=20,
      ylab=paste0("qSV1: ",getPcaVars(qsvBonf)[1],"% Var Expl"), col = c('orange', 'skyblue3')[factor(pd$Region)])
@@ -133,7 +146,19 @@ plot(qsvBonf$x[,2] ~ pd$Age,
      xlab = "Age",pch=20,
      ylab=paste0("qSV2: ",getPcaVars(qsvBonf)[2],"% Var Expl"), col = c('orange', 'skyblue3')[factor(pd$Region)])
 legend('topright', c('DLPFC', 'HIPPO'), lwd = 2, col = c('dark orange', 'skyblue3'), bty = 'n')
-     
+# exploring differences in fetal samples 
+boxplot(qsvBonf$x[,2] ~ pd$Age<0,
+	xlab = "Age<0",
+     ylab=paste0("qSV2: ",getPcaVars(qsvBonf)[2],"% Var Expl"))
+plot(qsvBonf$x[,1] ~ pd$rRNA_rate,
+     xlab = "rRNA Rate", pch=20,
+     ylab=paste0("pca1: ",getPcaVars(pca)[1],"% Var Expl"), col = c('orange', 'skyblue3')[factor(pd$Region)])
+legend('topright', c('DLPFC', 'HIPPO'), lwd = 2, col = c('dark orange', 'skyblue3'), bty = 'n')
+plot(qsvBonf$x[,1] ~ factor(pd$Sex),
+     xlab = "Sex",	ylab=paste0("qSV1: ",getPcaVars(qsvBonf)[1],"% Var Expl"))
+boxplot(qsvBonf$x[,1] ~ pd$Region + pd$Dx,
+	xlab = "Region and Diagnosis",
+     ylab=paste0("qSV1: ",getPcaVars(qsvBonf)[1],"% Var Expl"))
 dev.off()
 
 
@@ -260,6 +285,26 @@ summary(lm(qsvBonf$x[,1] ~ pd$Region))
 # Multiple R-squared:  0.2726,	Adjusted R-squared:  0.2718 
 # F-statistic: 336.6 on 1 and 898 DF,  p-value: < 2.2e-16
 
+print('Regression: qsv1 vs rRNA_rate')
+summary(lm(qsvBonf$x[,1] ~ pd$rRNA_rate))
+# Call:
+# lm(formula = qsvBonf$x[, 1] ~ pd$rRNA_rate)
+# 
+# Residuals:
+#     Min      1Q  Median      3Q     Max 
+# -54.675 -10.304   2.222  12.500  42.473 
+# 
+# Coefficients:
+#                Estimate Std. Error t value Pr(>|t|)  
+# (Intercept)     -1.4561     0.9547  -1.525   0.1276  
+# pd$rRNA_rate 36589.7405 19076.4582   1.918   0.0554 .
+# ---
+# Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+# 
+# Residual standard error: 17.37 on 898 degrees of freedom
+# Multiple R-squared:  0.00408,	Adjusted R-squared:  0.002971 
+# F-statistic: 3.679 on 1 and 898 DF,  p-value: 0.05542
+
 print('Regression: qsv1 vs Dx + totalAssigned')
 summary(lm(qsvBonf$x[,1] ~ pd$Dx + pd$totalAssignedGene))
 # Call:
@@ -316,4 +361,32 @@ summary(lm(qsvBonf$x[,1] ~ pd$totalAssignedGene * pd$Region * pd$Dx))
 # Residual standard error: 11.59 on 892 degrees of freedom
 # Multiple R-squared:  0.5596,	Adjusted R-squared:  0.5561 
 # F-statistic: 161.9 on 7 and 892 DF,  p-value: < 2.2e-16
+
+print('Regression: qsv1 vs Dx + Age + Sex + mitoRate + Region + rRNA_rate + totalAssignedGene')
+summary(lm(qsvBonf$x[,1] ~ pd$Dx + pd$Age + pd$Sex + pd$mitoRate + pd$Region + pd$rRNA_rate + pd$totalAssignedGene))
+# Call:
+# lm(formula = qsvBonf$x[, 1] ~ pd$Dx + pd$Age + pd$Sex + pd$mitoRate + 
+#     pd$Region + pd$rRNA_rate + pd$totalAssignedGene)
+# 
+# Residuals:
+#     Min      1Q  Median      3Q     Max 
+# -37.703  -4.870   0.716   5.248  47.000 
+# 
+# Coefficients:
+#                        Estimate Std. Error t value Pr(>|t|)    
+# (Intercept)          -7.520e+01  2.958e+00 -25.422  < 2e-16 ***
+# pd$DxSchizo          -2.256e+00  6.949e-01  -3.246 0.001213 ** 
+# pd$Age               -8.578e-02  1.500e-02  -5.719 1.47e-08 ***
+# pd$SexF              -2.317e+00  6.340e-01  -3.654 0.000273 ***
+# pd$mitoRate          -1.920e+02  6.006e+00 -31.970  < 2e-16 ***
+# pd$RegionHIPPO       -2.681e+00  1.086e+00  -2.470 0.013710 *  
+# pd$rRNA_rate         -4.073e+04  1.066e+04  -3.819 0.000143 ***
+# pd$totalAssignedGene  2.334e+02  6.859e+00  34.033  < 2e-16 ***
+# ---
+# Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+# 
+# Residual standard error: 8.891 on 892 degrees of freedom
+# Multiple R-squared:  0.7408,	Adjusted R-squared:  0.7388 
+# F-statistic: 364.3 on 7 and 892 DF,  p-value: < 2.2e-16
+
 
