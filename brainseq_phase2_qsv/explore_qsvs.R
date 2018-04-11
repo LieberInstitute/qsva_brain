@@ -146,9 +146,12 @@ plot(qsvBonf$x[,2] ~ pd$Age,
      xlab = "Age",pch=20,
      ylab=paste0("qSV2: ",getPcaVars(qsvBonf)[2],"% Var Expl"), col = c('orange', 'skyblue3')[factor(pd$Region)])
 legend('topright', c('DLPFC', 'HIPPO'), lwd = 2, col = c('dark orange', 'skyblue3'), bty = 'n')
-# exploring differences in fetal samples 
+# exploring differences in prenatal samples 
 boxplot(qsvBonf$x[,2] ~ pd$Age<0,
 	xlab = "Age<0",
+     ylab=paste0("qSV2: ",getPcaVars(qsvBonf)[2],"% Var Expl"))
+boxplot(qsvBonf$x[,2] ~ factor(ifelse(pd$Age<0, 'Prenatal', 'Postnatal')) + pd$Region,
+	xlab = "Age and Region", cex.axis=0.9,
      ylab=paste0("qSV2: ",getPcaVars(qsvBonf)[2],"% Var Expl"))
 plot(qsvBonf$x[,1] ~ pd$rRNA_rate,
      xlab = "rRNA Rate", pch=20,
