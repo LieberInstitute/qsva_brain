@@ -14,24 +14,6 @@ colData(rse_gene)$overallMapRate = sapply(colData(rse_gene)$overallMapRate, mean
 colData(rse_gene)$rRNA_rate = sapply(colData(rse_gene)$rRNA_rate,mean)
 colData(rse_gene)$ERCCsumLogErr = sapply(colData(rse_gene)$ERCCsumLogErr,mean)
 
-# add mds data
-mds = read.table("/dcl01/lieber/ajaffe/lab/brainseq_phase2/genotype_data/BrainSeq_Phase2_RiboZero_Genotypes_n551_maf05_geno10_hwe1e6.mds",
-	header=TRUE,as.is=TRUE, row.names=1)
-	
-brnum <- function(x) {
-	as.integer(gsub('Br', '', x))
-}
-
-m <- match(brnum(colData(rse_gene)$BrNum), brnum(rownames(mds)))
-names(m) <- brnum(colData(rse_gene)$BrNum)
-m['1061'] <- match(1060, brnum(rownames(mds)))
-stopifnot(all(!is.na(m)))
-mds = mds[m, 3:7]
-rownames(mds)[which(rownames(mds) == 'Br1060')] <- 'Br1061'
-
-colnames(mds) = paste0("snpPC", 1:5)
-colData(rse_gene) = cbind(colData(rse_gene), mds)
-
 ## model
 mod = model.matrix(~Dx + Age + Sex + mitoRate + Region + rRNA_rate + totalAssignedGene + RIN + snpPC1 + snpPC2 +snpPC3 + snpPC4 + snpPC5,
 	data = colData(rse_gene))
