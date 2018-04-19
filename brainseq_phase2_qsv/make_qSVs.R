@@ -34,5 +34,5 @@ modQsva = cbind(mod, qSVs)
 
 save(qsvBonf, qSVs, mod, modQsva, file = 'rdas/brainseq_phase2_qsvs.Rdata')
 pdf('pdf/qsvs_var_explained.pdf')
-plot(getPcaVars(qsvBonf), pch=20)
+plot(getPcaVars(qsvBonf)[1:k], pch=20)
 dev.off()

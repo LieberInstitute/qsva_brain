@@ -23,7 +23,7 @@ getPcaVars(pca)[1:5]
 
 ## degradation plots
 dir.create('pdf', showWarnings = FALSE)
-pdf('pdf/degradation.pdf')
+pdf('pdf/degradation.pdf', useDingbats = FALSE)
 plot(pca$x[,1] ~ pd$totalAssignedGene,
      xlab = "Gene Assignment Rate", pch=20,
      ylab=paste0("pca1: ",getPcaVars(pca)[1],"% Var Expl"), col = c('orange', 'skyblue3')[factor(pd$Region)])
@@ -75,7 +75,7 @@ getPcaVars(pca)[1:5]
 # [1] 33.50 17.90  6.17  4.65  2.75
 
 ## brainseq plots
-pdf('pdf/brainseqplots.pdf')
+pdf('pdf/brainseqplots.pdf', useDingbats = FALSE)
 plot(pca$x[,1] ~ pd$totalAssignedGene,
      xlab = "Gene Assignment Rate", pch=20,
      ylab=paste0("pca1: ",getPcaVars(pca)[1],"% Var Expl"), col = c('orange', 'skyblue3')[factor(pd$Region)])
@@ -117,7 +117,7 @@ getPcaVars(qsvBonf)[1:5]
 # [1] 57.80 15.70  3.36  2.70  2.36
 
 ## brainseq qsv plots
-pdf("pdf/qSVs_brainseq.pdf")
+pdf("pdf/qSVs_brainseq.pdf", useDingbats = FALSE)
 plot(qsvBonf$x[,1] ~ pd$totalAssignedGene,
      xlab = "Gene Assignment Rate",pch=20,
      ylab=paste0("qSV1: ",getPcaVars(qsvBonf)[1],"% Var Expl"), col = c('orange', 'skyblue3')[factor(pd$Region)])
