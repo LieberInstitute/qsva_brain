@@ -227,6 +227,31 @@ degradeStatsInt = degradeStatsInt[rownames(rse_gene),]
 save(degradeStats, degradeStatsInt, file = "rdas/DLPFC_Plus_HIPPO_RiboZero_geneLevel_degradationStats_forDEqual_hg38.rda")
 
 
+d_stats <- function(region) {
+    d <- dge[, rse_gene$Region == region]
+    m <- with(pd[rse_gene$Region == region, ], model.matrix( ~ DegradationTime + factor(BrNum)))
+
+    v = voom(d, m,plot=FALSE)
+    f = lmFit(v)
+    eb = eBayes(f)
+    dS = topTable(eBayes(f),coef=2,
+    	p.value = 1,number=nrow(rse_gene))
+    dS$gencodeTx = NULL
+    dS$bonf = NA
+    dS$bonf[dS$AveExpr > -2] = p.adjust(dS$P.Value[dS$AveExpr > -2] , "bonf")
+    dS = dS[rownames(rse_gene),]
+    return(dS)
+}
+
+degradeStats_DLPFC <- d_stats('DLPFC')
+degradeStats_HIPPO <- d_stats('HIPPO')
+
+save(degradeStats_DLPFC, degradeStats_HIPPO, file = 'rdas/DLPFC_HIPPO_degradationStats_hg38.rda')
+
+stopifnot(identical(rownames(degradeStats), rownames(degradeStatsInt)))
+stopifnot(identical(rownames(degradeStats), rownames(degradeStats_DLPFC)))
+stopifnot(identical(rownames(degradeStats), rownames(degradeStats_HIPPO)))
+
 Sys.time()
 proc.time()
 options(width = 120)
