@@ -17,6 +17,10 @@ colData(rse_gene)$rRNA_rate = sapply(colData(rse_gene)$rRNA_rate,mean)
 colData(rse_gene)$ERCCsumLogErr = sapply(colData(rse_gene)$ERCCsumLogErr,mean)
 
 ## model
+with(colData(rse_gene), table(Dx))
+# Dx
+# Control  Schizo
+#     614     286
 mod = model.matrix(~Dx + Age + Sex + mitoRate + Region + rRNA_rate + totalAssignedGene + RIN + snpPC1 + snpPC2 +snpPC3 + snpPC4 + snpPC5,
 	data = colData(rse_gene))
 
@@ -65,6 +69,10 @@ keepIndex <- which(rse_gene$Age > 17 & hipHMR)
 length(keepIndex)
 # [1] 712
 rse_gene <- rse_gene[, keepIndex]
+with(colData(rse_gene), table(Dx))
+# Dx
+# Control  Schizo
+#     426     286
 
 ## model
 mod = model.matrix(~Dx + Age + Sex + mitoRate + Region + rRNA_rate + totalAssignedGene + RIN + snpPC1 + snpPC2 +snpPC3 + snpPC4 + snpPC5,
@@ -122,6 +130,10 @@ keepIndex <- which(rse_gene$Age > 17 & hipHMR & rse_gene$Region == 'HIPPO')
 length(keepIndex)
 # [1] 333
 rse_gene <- rse_gene[, keepIndex]
+with(colData(rse_gene), table(Dx))
+# Dx
+# Control  Schizo
+#     200     133
 
 ## model
 mod = model.matrix(~Dx + Age + Sex + mitoRate + rRNA_rate + totalAssignedGene + RIN + snpPC1 + snpPC2 +snpPC3 + snpPC4 + snpPC5,
@@ -175,6 +187,10 @@ keepIndex <- which(rse_gene$Age > 17 & hipHMR & rse_gene$Region == 'DLPFC')
 length(keepIndex)
 # [1] 379
 rse_gene <- rse_gene[, keepIndex]
+with(colData(rse_gene), table(Dx))
+# Dx
+# Control  Schizo
+#     226     153
 
 ## model
 mod = model.matrix(~Dx + Age + Sex + mitoRate + rRNA_rate + totalAssignedGene + RIN + snpPC1 + snpPC2 +snpPC3 + snpPC4 + snpPC5,
