@@ -58,12 +58,136 @@ stopifnot(identical(rownames(outGene), rownames(outGeneNoAdj)))
 
 save(outGene, outGene0, outGeneNoAdj, file = "rdas/dxStats_dlpfc_filtered_qSVA_geneLevel.rda")
 
+
+
+
+### Run with Gold samples using the qSVs made without the age>17 samples
+## and without the HIPPO Gold samples
+rm(list = ls())
+load("/dcl01/lieber/ajaffe/lab/brainseq_phase2/expr_cutoff/rse_gene.Rdata", verbose = TRUE)
+load('/dcl01/ajaffe/data/lab/qsva_brain/brainseq_phase2_qsv/rdas/brainseq_phase2_qsvs_age17_noHGold.Rdata', verbose = TRUE)
+
+## Drop prenatal
+rse_gene <- rse_gene[, keepIndex]
+
+keepIndex = which(rse_gene$Age>17 &
+			rse_gene$Region == "DLPFC")
+rse_gene <- rse_gene[, keepIndex]
+mod <- mod[keepIndex, -which(colnames(mod) == 'RegionHIPPO')]
+modQsva <- modQsva[keepIndex, -which(colnames(modQsva) == 'RegionHIPPO')]
+
+##### GENE ######
+dge = DGEList(counts = assays(rse_gene)$counts,
+	genes = rowData(rse_gene))
+#calculate library-size adjustment
+dge = calcNormFactors(dge)
+
+pdf('pdf/dlpfc_voom_qsva_noHGoldQSV.pdf', useDingbats = FALSE)
+vGene = voom(dge,modQsva, plot=TRUE)
+dev.off()
+fitGene = lmFit(vGene)
+eBGene = eBayes(fitGene)
+sigGene = topTable(eBGene,coef=2,
+	p.value = 1,number=nrow(rse_gene))
+outGene = sigGene[rownames(rse_gene),]
+
+## no qSVA
+pdf('pdf/dlpfc_voom_noqsva_noHGoldQSV.pdf', useDingbats = FALSE)
+vGene0 = voom(dge,mod, plot=TRUE)
+dev.off()
+fitGene0 = lmFit(vGene0)
+eBGene0 = eBayes(fitGene0)
+sigGene0 = topTable(eBGene0,coef=2,
+	p.value = 1,number=nrow(rse_gene))
+outGene0 = sigGene0[rownames(rse_gene),]
+
+## no adjustment vars
+pdf('pdf/dlpfc_voom_noadj_noHGoldQSV.pdf', useDingbats = FALSE)
+vGeneNoAdj = voom(dge, with(colData(rse_gene), model.matrix( ~ Dx)), plot=TRUE)
+dev.off()
+fitGeneNoAdj = lmFit(vGeneNoAdj)
+eBGeneNoAdj = eBayes(fitGeneNoAdj)
+sigGeneNoAdj = topTable(eBGeneNoAdj,coef=2,
+	p.value = 1,number=nrow(rse_gene))
+outGeneNoAdj = sigGeneNoAdj[rownames(rse_gene),]
+
+
+stopifnot(identical(rownames(outGene), rownames(outGene0)))
+stopifnot(identical(rownames(outGene), rownames(outGeneNoAdj)))
+
+save(outGene, outGene0, outGeneNoAdj, file = "rdas/dxStats_dlpfc_filtered_qSVA_geneLevel_noHGoldQSV.rda")
+
+
+
+### Run with Gold samples using the qSVs made without the age>17 samples
+## and without the HIPPO Gold samples (qsv are DLPFC specific)
+rm(list = ls())
+load("/dcl01/lieber/ajaffe/lab/brainseq_phase2/expr_cutoff/rse_gene.Rdata", verbose = TRUE)
+load('/dcl01/ajaffe/data/lab/qsva_brain/brainseq_phase2_qsv/rdas/brainseq_phase2_qsvs_age17_noHGold_DLPFC.Rdata', verbose = TRUE)
+
+## Drop prenatal
+rse_gene <- rse_gene[, keepIndex]
+
+keepIndex = which(rse_gene$Age>17 &
+			rse_gene$Region == "DLPFC")
+rse_gene <- rse_gene[, keepIndex]
+mod <- mod[keepIndex, ]
+modQsva <- modQsva[keepIndex, ]
+
+##### GENE ######
+dge = DGEList(counts = assays(rse_gene)$counts,
+	genes = rowData(rse_gene))
+#calculate library-size adjustment
+dge = calcNormFactors(dge)
+
+pdf('pdf/dlpfc_voom_qsva_noHGoldQSV_matchDLPFC.pdf', useDingbats = FALSE)
+vGene = voom(dge,modQsva, plot=TRUE)
+dev.off()
+fitGene = lmFit(vGene)
+eBGene = eBayes(fitGene)
+sigGene = topTable(eBGene,coef=2,
+	p.value = 1,number=nrow(rse_gene))
+outGene = sigGene[rownames(rse_gene),]
+
+## no qSVA
+pdf('pdf/dlpfc_voom_noqsva_noHGoldQSV_matchDLPFC.pdf', useDingbats = FALSE)
+vGene0 = voom(dge,mod, plot=TRUE)
+dev.off()
+fitGene0 = lmFit(vGene0)
+eBGene0 = eBayes(fitGene0)
+sigGene0 = topTable(eBGene0,coef=2,
+	p.value = 1,number=nrow(rse_gene))
+outGene0 = sigGene0[rownames(rse_gene),]
+
+## no adjustment vars
+pdf('pdf/dlpfc_voom_noadj_noHGoldQSV_matchDLPFC.pdf', useDingbats = FALSE)
+vGeneNoAdj = voom(dge, with(colData(rse_gene), model.matrix( ~ Dx)), plot=TRUE)
+dev.off()
+fitGeneNoAdj = lmFit(vGeneNoAdj)
+eBGeneNoAdj = eBayes(fitGeneNoAdj)
+sigGeneNoAdj = topTable(eBGeneNoAdj,coef=2,
+	p.value = 1,number=nrow(rse_gene))
+outGeneNoAdj = sigGeneNoAdj[rownames(rse_gene),]
+
+
+stopifnot(identical(rownames(outGene), rownames(outGene0)))
+stopifnot(identical(rownames(outGene), rownames(outGeneNoAdj)))
+
+save(outGene, outGene0, outGeneNoAdj, file = "rdas/dxStats_dlpfc_filtered_qSVA_geneLevel_noHGoldQSV_matchDLPFC.rda")
+
+
+
+
+
+
+
 ## Reproducibility information
 print('Reproducibility information:')
 Sys.time()
 proc.time()
 options(width = 120)
 session_info()
+
 
 # Session info ----------------------------------------------------------------------------------------------------------
 #  setting  value
@@ -73,7 +197,7 @@ session_info()
 #  language (EN)
 #  collate  en_US.UTF-8
 #  tz       US/Eastern
-#  date     2018-04-18
+#  date     2018-04-25
 #
 # Packages --------------------------------------------------------------------------------------------------------------
 #  package              * version   date       source
@@ -98,10 +222,11 @@ session_info()
 #  grid                   3.4.3     2018-01-20 local
 #  gtable                 0.2.0     2016-02-26 CRAN (R 3.4.1)
 #  htmltools              0.3.6     2017-04-28 CRAN (R 3.4.1)
-#  htmlwidgets            1.0       2018-01-20 CRAN (R 3.4.3)
+#  htmlwidgets            1.2       2018-04-19 CRAN (R 3.4.3)
 #  httpuv                 1.3.6.2   2018-03-02 CRAN (R 3.4.3)
 #  IRanges              * 2.12.0    2017-11-29 Bioconductor
-#  jaffelab             * 0.99.18   2018-02-22 Github (LieberInstitute/jaffelab@a8e6430)
+#  jaffelab             * 0.99.20   2018-04-19 Github (LieberInstitute/jaffelab@04c470a)
+#  later                  0.7.1     2018-03-07 CRAN (R 3.4.3)
 #  lattice                0.20-35   2017-03-25 CRAN (R 3.4.3)
 #  lazyeval               0.2.1     2017-10-29 CRAN (R 3.4.2)
 #  limma                * 3.34.9    2018-04-18 Bioconductor
@@ -135,5 +260,4 @@ session_info()
 #  xfun                   0.1       2018-01-22 CRAN (R 3.4.3)
 #  XVector                0.18.0    2017-11-29 Bioconductor
 #  zlibbioc               1.24.0    2017-11-07 Bioconductor
-
-
+#
