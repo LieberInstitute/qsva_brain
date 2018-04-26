@@ -250,7 +250,7 @@ sapply(de_genes_sign, length)
 ## Top DE genes by sign
 de_genes_sign_top <- mapply(function(x, sign) {
     x <- x[sign(x$logFC) == sign, ]
-    head(x$ensemblID[order(x$adj.P.Val, decreasing = FALSE)], 50)
+    head(x$ensemblID[order(x$adj.P.Val, decreasing = FALSE)], 150)
 }, outGene[c(5, 5, 6, 6)], sign = rep(c(-1, 1), 2), SIMPLIFY = FALSE)
 names(de_genes_sign_top) <- names(de_genes_sign)
 sapply(de_genes_sign_top, length)
@@ -407,11 +407,11 @@ pdf('pdf/go_all_de_genes.pdf', width = 16, height = 70, useDingbats = FALSE)
 plot_go(go_de_genes, cat = NULL)
 dev.off()
 
-pdf('pdf/go_de_genes_top50.pdf', width = 14, height = 9, useDingbats = FALSE)
+pdf('pdf/go_de_genes_top150.pdf', width = 14, height = 9, useDingbats = FALSE)
 plot_go(go_de_genes_top)
 dev.off()
 
-pdf('pdf/go_all_de_genes_top50.pdf', width = 16, height = 70, useDingbats = FALSE)
+pdf('pdf/go_all_de_genes_top150.pdf', width = 16, height = 70, useDingbats = FALSE)
 plot_go(go_de_genes_top, cat = NULL)
 dev.off()
 
