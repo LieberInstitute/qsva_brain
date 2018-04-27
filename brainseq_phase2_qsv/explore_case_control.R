@@ -250,7 +250,7 @@ sapply(de_genes_sign, length)
 ## Top DE genes by sign
 de_genes_sign_top <- mapply(function(x, sign) {
     x <- x[sign(x$logFC) == sign, ]
-    head(x$ensemblID[order(x$adj.P.Val, decreasing = FALSE)], 150)
+    head(x$ensemblID[order(x$adj.P.Val, decreasing = FALSE)], 400)
 }, outGene[c(5, 5, 6, 6)], sign = rep(c(-1, 1), 2), SIMPLIFY = FALSE)
 names(de_genes_sign_top) <- names(de_genes_sign)
 sapply(de_genes_sign_top, length)
@@ -276,6 +276,18 @@ make_venn_pretty(list('HIPPO' = de_genes_sign[[2]], 'DLPFC' = de_genes_sign[[4]]
 make_venn_pretty(de_genes_sign_top, 'top 400 in each group')
 make_venn_pretty(list('HIPPO' = de_genes_sign_top[[1]], 'DLPFC' = de_genes_sign_top[[3]]), 'Control (top 400)')
 make_venn_pretty(list('HIPPO' = de_genes_sign_top[[2]], 'DLPFC' = de_genes_sign_top[[4]]), 'Schizo (top 400)')
+make_venn_pretty(lapply(de_genes_sign_top, head, n = 200), 'top 200 in each group')
+make_venn_pretty(list('HIPPO' = head(de_genes_sign_top[[1]], 200), 'DLPFC' = head(de_genes_sign_top[[3]], 200)), 'Control (top 200)')
+make_venn_pretty(list('HIPPO' = head(de_genes_sign_top[[2]], 200), 'DLPFC' = head(de_genes_sign_top[[4]], 200)), 'Schizo (top 200)')
+make_venn_pretty(lapply(de_genes_sign_top, head, n = 150), 'top 150 in each group')
+make_venn_pretty(list('HIPPO' = head(de_genes_sign_top[[1]], 150), 'DLPFC' = head(de_genes_sign_top[[3]], 150)), 'Control (top 150)')
+make_venn_pretty(list('HIPPO' = head(de_genes_sign_top[[2]], 150), 'DLPFC' = head(de_genes_sign_top[[4]], 150)), 'Schizo (top 150)')
+make_venn_pretty(lapply(de_genes_sign_top, head, n = 100), 'top 100 in each group')
+make_venn_pretty(list('HIPPO' = head(de_genes_sign_top[[1]], 100), 'DLPFC' = head(de_genes_sign_top[[3]], 100)), 'Control (top 100)')
+make_venn_pretty(list('HIPPO' = head(de_genes_sign_top[[2]], 100), 'DLPFC' = head(de_genes_sign_top[[4]], 100)), 'Schizo (top 100)')
+make_venn_pretty(lapply(de_genes_sign_top, head, n = 50), 'top 50 in each group')
+make_venn_pretty(list('HIPPO' = head(de_genes_sign_top[[1]], 50), 'DLPFC' = head(de_genes_sign_top[[3]], 50)), 'Control (top 50)')
+make_venn_pretty(list('HIPPO' = head(de_genes_sign_top[[2]], 50), 'DLPFC' = head(de_genes_sign_top[[4]], 50)), 'Schizo (top 50)')
 dev.off()
 system('rm VennDiagram*.log')
 
@@ -344,7 +356,7 @@ run_go <- function(genes, ont = c('BP', 'MF', 'CC')) {
         tryCatch(compareCluster(genes_ens, fun = "enrichGO",
             universe = uni, OrgDb = 'org.Hs.eg.db',
             ont = bp, pAdjustMethod = "BH",
-            pvalueCutoff  = 0.05, qvalueCutoff  = 0.2,
+            pvalueCutoff  = 0.1, qvalueCutoff  = 0.05,
             readable = TRUE, keyType = 'ENSEMBL'),
             error = function(e) { return(NULL) })
     })
@@ -365,14 +377,17 @@ if(!file.exists('rdas/go_de_genes.Rdata')) {
 sapply(go_de_genes, class)
 
 if(!file.exists('rdas/go_de_genes_top.Rdata')) {
-    system.time( go_de_genes_top <- run_go(de_genes_sign_top) )
+    go_de_genes_top <- lapply(c(50, 100, 150, 200), function(n) {
+        run_go(lapply(de_genes_sign_top, head, n = n))
+    })
+    names(go_de_genes_top) <- c(50, 100, 150, 200)
     message(paste(Sys.time(), 'saving rda/go_de_genes_top.Rdata'))
     save(go_de_genes_top, file = 'rdas/go_de_genes_top.Rdata')
 } else {
     message(paste(Sys.time(), 'loading rdas/go_de_genes_top.Rdata'))
     load('rdas/go_de_genes_top.Rdata', verbose = TRUE)
 }
-sapply(go_de_genes, class)
+lapply(go_de_genes_top, function(x) sapply(x, class))
 
 
 simplify_go <- function(x) {
@@ -407,22 +422,70 @@ pdf('pdf/go_all_de_genes.pdf', width = 16, height = 70, useDingbats = FALSE)
 plot_go(go_de_genes, cat = NULL)
 dev.off()
 
-pdf('pdf/go_de_genes_top150.pdf', width = 14, height = 9, useDingbats = FALSE)
-plot_go(go_de_genes_top)
+for(i in names(go_de_genes_top)) {
+    pdf(paste0('pdf/go_de_genes_top', i, '.pdf'), width = 14, height = 9, useDingbats = FALSE)
+    plot_go(go_de_genes_top[[i]])
+    dev.off()
+
+    pdf(paste0('pdf/go_all_de_genes_top', i, '.pdf'), width = 16, height = 70, useDingbats = FALSE)
+    plot_go(go_de_genes_top[[i]], cat = NULL)
+    dev.off()
+}
+
+run_gse <-  function(region, ont = c('BP', 'MF', 'CC')) {
+
+    genes <- outGene[[paste0(region, '_matchQSV')]]$t
+    names(genes) <- outGene[[paste0(region, '_matchQSV')]]$ensemblID
+    genes <- genes[order(genes, decreasing = TRUE)]
+
+    ## Run gseGO analysis
+    go_cluster <- lapply(ont, function(bp) {
+        message(paste(Sys.time(), 'running gseGO analysis for', bp))
+        tryCatch(gseGO(genes, OrgDb = 'org.Hs.eg.db',
+            ont = bp, pAdjustMethod = "BH",
+            keyType = 'ENSEMBL', verbose = TRUE),
+            error = function(e) { return(NULL) })
+    })
+    names(go_cluster) <- ont
+    return(go_cluster)
+}
+
+
+system.time( gse_hippo <- run_gse('HIPPO') )
+system.time( gse_dlpfc <- run_gse('DLPFC') )
+save(gse_hippo, gse_dlpfc, file = 'rdas/gse.Rdata')
+
+
+plot_gse <- function(gse) {
+    lapply(names(gse), function(bp) {
+        go <- gse[[bp]]
+        if(is.null(go)) {
+            message(paste(Sys.time(), 'found no results for', bp))
+            return(NULL)
+        }
+
+        print(dotplot(go, title = paste('ontology:', bp), font.size = 18))
+        return(NULL)
+    })
+}
+
+
+pdf('pdf/gse_hippo.pdf', width = 14, height = 9, useDingbats = FALSE)
+plot_gse(gse_hippo)
 dev.off()
 
-pdf('pdf/go_all_de_genes_top150.pdf', width = 16, height = 70, useDingbats = FALSE)
-plot_go(go_de_genes_top, cat = NULL)
+pdf('pdf/gse_dlpfc.pdf', width = 14, height = 9, useDingbats = FALSE)
+plot_gse(gse_dlpfc)
 dev.off()
 
 
 
 ## Scatter of logFC
-comp_log <- function(x, y, xlab, ylab, var = 'logFC', de = FALSE) {
+comp_log <- function(x, y, xlab, ylab, var = 'logFC', de = FALSE, n = 150) {
     if(de) {
         common <- unique(c(
-            head(x$ensemblID[order(x$adj.P.Val, decreasing = FALSE)], 150),
-            head(y$ensemblID[order(y$adj.P.Val, decreasing = FALSE)], 150)
+            head(x$ensemblID[order(x$adj.P.Val, decreasing = FALSE)], n),
+            head(y$ensemblID[order(y$adj.P.Val, decreasing = FALSE)], n)
         ))
     } else {
         common <- intersect(x$ensemblID, y$ensemblID)
@@ -469,6 +532,20 @@ comp_log(outGene[[5]], outGene[[7]], 'HIPPO', 'BSP1', var = 't', de = TRUE)
 comp_log(outGene[[5]], outGene[[8]], 'HIPPO', 'CMC', var = 't', de = TRUE)
 comp_log(outGene[[6]], outGene[[7]], 'DLPFC', 'BSP1', var = 't', de = TRUE)
 comp_log(outGene[[6]], outGene[[8]], 'DLPFC', 'CMC', var = 't', de = TRUE)
+dev.off()
+
+pdf('pdf/scatter_models_top400de.pdf', useDingbats = FALSE)
+comp_log(outGene[[5]], outGene[[6]], 'HIPPO', 'DLPFC', de = TRUE, n = 400)
+comp_log(outGene[[5]], outGene[[7]], 'HIPPO', 'BSP1', de = TRUE, n = 400)
+comp_log(outGene[[5]], outGene[[8]], 'HIPPO', 'CMC', de = TRUE, n = 400)
+comp_log(outGene[[6]], outGene[[7]], 'DLPFC', 'BSP1', de = TRUE, n = 400)
+comp_log(outGene[[6]], outGene[[8]], 'DLPFC', 'CMC', de = TRUE, n = 400)
+
+comp_log(outGene[[5]], outGene[[6]], 'HIPPO', 'DLPFC', var = 't', de = TRUE, n = 400)
+comp_log(outGene[[5]], outGene[[7]], 'HIPPO', 'BSP1', var = 't', de = TRUE, n = 400)
+comp_log(outGene[[5]], outGene[[8]], 'HIPPO', 'CMC', var = 't', de = TRUE, n = 400)
+comp_log(outGene[[6]], outGene[[7]], 'DLPFC', 'BSP1', var = 't', de = TRUE, n = 400)
+comp_log(outGene[[6]], outGene[[8]], 'DLPFC', 'CMC', var = 't', de = TRUE, n = 400)
 dev.off()
 
 
