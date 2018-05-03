@@ -481,12 +481,19 @@ dev.off()
 
 
 ## Scatter of logFC
-comp_log <- function(x, y, xlab, ylab, var = 'logFC', de = FALSE, n = 150) {
+comp_log <- function(x, y, xlab, ylab, var = 'logFC', de = FALSE, n = 150, onlyx = FALSE) {
     if(de) {
-        common <- unique(c(
-            head(x$ensemblID[order(x$adj.P.Val, decreasing = FALSE)], n),
-            head(y$ensemblID[order(y$adj.P.Val, decreasing = FALSE)], n)
-        ))
+        if(!onlyx) {
+            common <- unique(c(
+                head(x$ensemblID[order(x$adj.P.Val, decreasing = FALSE)], n),
+                head(y$ensemblID[order(y$adj.P.Val, decreasing = FALSE)], n)
+            ))
+        } else {
+            common <- unique(c(
+                head(x$ensemblID[order(x$adj.P.Val, decreasing = FALSE)], n)
+            ))
+        }
+        
     } else {
         common <- intersect(x$ensemblID, y$ensemblID)
     }
@@ -547,6 +554,22 @@ comp_log(outGene[[5]], outGene[[8]], 'HIPPO', 'CMC', var = 't', de = TRUE, n = 4
 comp_log(outGene[[6]], outGene[[7]], 'DLPFC', 'BSP1', var = 't', de = TRUE, n = 400)
 comp_log(outGene[[6]], outGene[[8]], 'DLPFC', 'CMC', var = 't', de = TRUE, n = 400)
 dev.off()
+
+
+pdf('pdf/scatter_models_top400de_onlyX.pdf', useDingbats = FALSE)
+comp_log(outGene[[5]], outGene[[6]], 'HIPPO', 'DLPFC', de = TRUE, n = 400, onlyx = TRUE)
+comp_log(outGene[[5]], outGene[[7]], 'HIPPO', 'BSP1', de = TRUE, n = 400, onlyx = TRUE)
+comp_log(outGene[[5]], outGene[[8]], 'HIPPO', 'CMC', de = TRUE, n = 400, onlyx = TRUE)
+comp_log(outGene[[6]], outGene[[7]], 'DLPFC', 'BSP1', de = TRUE, n = 400, onlyx = TRUE)
+comp_log(outGene[[6]], outGene[[8]], 'DLPFC', 'CMC', de = TRUE, n = 400, onlyx = TRUE)
+
+comp_log(outGene[[5]], outGene[[6]], 'HIPPO', 'DLPFC', var = 't', de = TRUE, n = 400, onlyx = TRUE)
+comp_log(outGene[[5]], outGene[[7]], 'HIPPO', 'BSP1', var = 't', de = TRUE, n = 400, onlyx = TRUE)
+comp_log(outGene[[5]], outGene[[8]], 'HIPPO', 'CMC', var = 't', de = TRUE, n = 400, onlyx = TRUE)
+comp_log(outGene[[6]], outGene[[7]], 'DLPFC', 'BSP1', var = 't', de = TRUE, n = 400, onlyx = TRUE)
+comp_log(outGene[[6]], outGene[[8]], 'DLPFC', 'CMC', var = 't', de = TRUE, n = 400, onlyx = TRUE)
+dev.off()
+
 
 
 
