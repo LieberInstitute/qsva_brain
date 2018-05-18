@@ -1,0 +1,198 @@
+---
+title: "Applying Statistical Correction for Brain Tissue RNA Degradation to Gene Expression Differences in Schizophrenia"
+author:
+- name: Amy Peterson
+  affiliation: Johns Hopkins School of Public Health MPH
+- name: Andrew E Jaffe
+  affiliation: Lieber Institute for Brain Development
+  email: andrew.jaffe@libd.org
+- name: Leonardo Collado-Torres
+  affiliation: Lieber Institute for Brain Development
+  email: leo.collado@libd.org
+output:
+  BiocStyle::html_document
+abstract: |
+  MLR for 140.624
+---
+
+# Introduction
+
+This document highlights some of the multiple linear regressions that were performed for the analysis of BrainSeq data using the qSVA method to adjust for RNA-quality degradation, which confounds the signal of differential gene expression between schizophrenia cases and non-psychiatric controls in the DLPFC and HIPPO brain regions.
+
+# Load the data
+
+First, we need to load the BrainSeq data. This includes loading the `qsvBonf`, `qSVs`, `mod`, and `modQsva` objects which were saved from a previous script but commented below. The top qSVs were obtained using Bonferroni correction on the PC's obtained from PCA on the degradation matrix. The top k PC's were selected using the `sva::num.sv` function (k = 16 in this case). The model saved as `mod` included diagnosis, RNA-quality, and demographic covariates. The `modQsva` object contains `mod` and the qSVs.
+
+```{r 'load pkgs', message = FALSE, warning = FALSE}
+## Load R packages required for this analysis
+library('devtools')
+library('SummarizedExperiment')
+library('limma')
+library('edgeR')
+library('broom')
+```
+
+
+```{r 'load data'}
+#load qsvBonf, qSVs, mod, modQsva object from brainseq data
+## get qSVs for top bonferroni
+# qsvBonf = prcomp(t(log2(assays(cov_rse)$counts+1)))
+## qsva
+# k = num.sv(log2(assays(cov_rse)$counts+1), mod)
+# qSVs = qsvBonf$x[,1:k]
+# getPcaVars(qsvBonf)[1:k]
+# # [1] 57.800 15.700  3.360  2.700  2.360  1.160  1.040  0.848  0.750  0.661
+# # [11]  0.587  0.511  0.461  0.419  0.356  0.312  0.291  0.284  0.271  0.259
+## modQsva = cbind(mod, qSVs)
+## mod = model.matrix(~Dx + Age + Sex + mitoRate + Region + rRNA_rate + 
+## totalAssignedGene + RIN + snpPC1 + snpPC2 +snpPC3 + snpPC4 + snpPC5,
+## data = colData(rse_gene))
+#qsvBonf, qSVs, mod, modQsva were then saved in a previous script to rdas/brainseq_phase2_qsvs.Rdata
+load("/dcl01/lieber/ajaffe/lab/brainseq_phase2/expr_cutoff/rse_gene.Rdata", verbose = TRUE)
+load('/dcl01/ajaffe/data/lab/qsva_brain/brainseq_phase2_qsv/rdas/brainseq_phase2_qsvs_age17_noHGold_HIPPO.Rdata', verbose = TRUE)
+
+## Drop prenatal
+rse_gene <- rse_gene[, keepIndex]
+
+## Keep the correct samples
+keepIndex = which(rse_gene$Age>17 &
+			rse_gene$Region == "HIPPO")
+rse_gene <- rse_gene[, keepIndex]
+mod <- mod[keepIndex, ]
+modQsva <- modQsva[keepIndex, ]
+```
+
+
+# Full qSVA analysis
+
+As seen the overall workflow on slide 7, and slides 12 through 14 of the original presentation, below is code for the qSVA analysis that was performed using the three different models. Model 1 was a naive model that included diagnosis only. Model 2 was a model including diagnosis, and adding in RNA-quality and demographic covariates. Model 3 is a model including the qSVs, in addition to diagnosis, RNA-quality, and demographic covariates.
+
+```{r 'run qSVA'}
+##### GENE ######
+dge = DGEList(counts = assays(rse_gene)$counts,
+	genes = rowData(rse_gene))
+#calculate library-size adjustment
+dge = calcNormFactors(dge)
+vGene = voom(dge,modQsva, plot=TRUE)
+fitGene = lmFit(vGene)
+eBGene = eBayes(fitGene)
+sigGene = topTable(eBGene,coef=2,
+	p.value = 1,number=nrow(rse_gene))
+outGene = sigGene[rownames(rse_gene),]
+
+## no qSVA
+vGene0 = voom(dge,mod, plot=TRUE)
+fitGene0 = lmFit(vGene0)
+eBGene0 = eBayes(fitGene0)
+sigGene0 = topTable(eBGene0,coef=2,
+	p.value = 1,number=nrow(rse_gene))
+outGene0 = sigGene0[rownames(rse_gene),]
+
+## no adjustment vars
+vGeneNoAdj = voom(dge, with(colData(rse_gene), model.matrix( ~ Dx)), plot=TRUE)
+fitGeneNoAdj = lmFit(vGeneNoAdj)
+eBGeneNoAdj = eBayes(fitGeneNoAdj)
+sigGeneNoAdj = topTable(eBGeneNoAdj,coef=2,
+	p.value = 1,number=nrow(rse_gene))
+outGeneNoAdj = sigGeneNoAdj[rownames(rse_gene),]
+```
+
+
+# Multiple linear regressions for one gene
+
+## `ELP6`: case where it's not significant after qSVA
+
+In the example gene _ELP6_ seen below, the gene shown is initially seen as significant in the first two models in the HIPPO brain region. After adding in the qSVs, the gene is not seen as significant anymore. This is an example of the importance of including all of the covariates in the final model to reduce the number of false positives, or genes that are incorrectly identified as differentially expressed when in fact the perceived differential expression is a result of inadequate control of the confounding effect of RNA quality.
+
+```{r 'explore_gene'}
+## Find a gene that is not DE after qSVA but is in previous models
+i <- which(outGene$adj.P.Val > 0.05 & outGene0$adj.P.Val < 0.05)[14]
+outGene[i, ]
+
+## Explore that gene in more detail
+explore_gene <- function(i, expr, model = 1) {
+    y <- expr$E[i, ]
+    df <- as.data.frame(cbind(y, modQsva))
+    if(model == 1) {
+         f <- lm(y ~ DxSchizo, data = df)
+    } else if (model == 2) {
+         f <- lm(y ~ DxSchizo + Age + SexM + mitoRate + rRNA_rate + 
+                     totalAssignedGene + RIN + snpPC1 + snpPC2 +
+                     snpPC3 + snpPC4 + snpPC5, data = df)
+    } else if (model == 3) {
+         f <- lm(y ~ DxSchizo + Age + SexM + mitoRate + rRNA_rate +
+                     totalAssignedGene + RIN + snpPC1 + snpPC2 +
+                     snpPC3 + snpPC4 + snpPC5 + PC1 + PC2 + PC3 +
+                     PC4 + PC5 + PC6 + PC7 + PC8 + PC9 + PC10 + PC11 +
+                     PC12 + PC13 + PC14 + PC15 + PC16, data = df)
+    }
+    summary(f)
+}
+
+## Model 1: Dx only
+explore_gene(i, vGene, model = 1)
+
+## Model 2: with all quality and demographic covariates
+explore_gene(i, vGene, model = 2)
+
+## Model 3: with all of the above and the qSVs (1 to 16)
+explore_gene(i, vGene, model = 3)
+
+## Export for editing with Excel
+write.csv(tidy(explore_gene(i, vGene, model = 3)), file = 'gene1.csv')
+```
+
+
+
+The interpretation of the p-value in the model for each gene determines whether or not the gene is considered differentially expressed between schizophrenic cases and non-psychiatric controls. For _ELP6_, using the diagnosis only model, the gene is considered differentially expressed (p = 2.57x10-10). In the second model, once the RNA-quality and demographic covariates are added in, _ELP6_ is still considered differentially expression (p = 2.89x10-5). In the final model, with qSVs added in addition to diagnosis, RNA-quality, and demographic covariates, _ELP6_ is no longer considered differentially expressed (p = 0.06526) between cases and controls with a log2 fold change of -3.053x10-2 (higher expression in schizophrenia cases).
+
+
+
+
+## `AHCYL1`: case where it's significant after qSVA
+
+In the gene _AHCYL1_ below, the gene remains significant throughout the 3 different models between schizophrenia cases and non-psychiatric controls for the HIPPO brain region. This demonstrates the ability to correctly identify genes that are differentially expressed between schizophrenic cases and non-psychiatric controls. The ability to identify a gene as differentially expressed throughout all 3 models increases the confidence that the genes that are identified as differentially expressed using the final model are truly differentially expressed. 
+
+```{r 'explore_sig_gene'}
+## Example gene that is DE after qSVA
+i <- which(outGene$adj.P.Val < 0.05)[3]
+outGene[i, ]
+
+## Model 1: Dx only
+explore_gene(i, vGene, model = 1)
+
+## Model 2: with all quality and demographic covariates
+explore_gene(i, vGene, model = 2)
+
+## Model 3: with all of the above and the qSVs (1 to 16)
+explore_gene(i, vGene, model = 3)
+
+## Export for editing with Excel
+write.csv(tidy(explore_gene(i, vGene, model = 3)), file = 'gene2.csv')
+```
+
+
+As previously explained, the interpretation of the p-value in the model for each gene determines whether or not the gene is considered differentially expressed between schizophrenic cases and non-psychiatric controls. For _AHCLY1_, using the diagnosis only model, the gene is considered differentially expressed (p = 0.00656). In the second model, once the RNA-quality and demographic covariates are added in, _AHCLY1_ remains differentially expression (p = 0.00459). In the final model, with qSVs added in addition to diagnosis, RNA-quality, and demographic covariates, _AHCLY1_ remains differentially expressed (p = 8.38x10-6) between cases and controls with a log2 fold change of 1.188x10-1 (higher expression in non-psychiatric controls).
+
+## Adjusted covariates interpretation
+
+Further, in terms of interpretation of other coefficients relevant to the model, RNA integrity number (RIN) is a covariate that changes significance once the qSVs are added in to the model in model 3. This increases the confidence that RNA quality confounding is adequately controlled for, since RIN is statistically significant in Model 2, but no longer appears significant in Model 3.
+
+For _ELP6_, the false positive example that appeared to be differentially expressed until the qSVs were added in for Model 3. In Model 2, where _ELP6_ still appears to be differentially expressed, RIN is statistically significant (p=1.18x10-7). In Model 3, where _ELP6_ is no longer differentially expressed, RIN is not statistically significant (p=0.50511).
+
+For _AHCYL1_, the gene that remains differentially expressed throughout the three models, RIN remains non-statistically significant in both Model 2 and 3. In Model 2 RIN is not statistically significant (p=0.87420). In Model 3, where _AHCYL1_ remains differentially expressed, RIN is not statistically significant (p=0.072202).
+
+# Conclusions
+
+The MLR analysis shown for the two example genes was completed for all of the aproximately 25,000 genes contained in the BrainSeq dataset, a case-control dataset comparing schizophrenic cases to non-psychiatric controls. In the examples shown, _ELP6_ was a false positive gene incorrectly identified as differentially expressed between the two groups until the qSVs were added, and _AHCLY1_ was a gene that remained differentially expressed throughout all 3 models. The ability to correctly identify the genes in the dataset as differentially expressed between the two groups was dependent on adequate control of RNA quality confounding. The effectiveness of the statistical correction for RNA quality confounding was shown by the DEqual plots displayed on slides 12 - 14.
+
+Overall, the qSVA method greatly reduced the number of differentially expressed genes between schizophrenia cases and non-psychiatric controls, thus increasing the confidence in the results.
+
+# Session info {.unnumbered}
+
+This section shows the R session information for reproducing the analysis. This document was generated using the JHPCE computing cluster due to the size of the data analyzed.
+
+```{r sessionInfo, echo=FALSE}
+options(width = 120)
+session_info()
+```
