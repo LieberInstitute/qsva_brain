@@ -361,6 +361,16 @@ run_go <- function(genes, ont = c('BP', 'MF', 'CC')) {
             error = function(e) { return(NULL) })
     })
     names(go_cluster) <- ont
+    
+    genes_ncbi <- lapply(lapply(genes_ens, bitr, fromType = 'ENSEMBL', toType = 'ENTREZID', OrgDb = 'org.Hs.eg.db'), function(x) x$ENTREZID)
+    
+    uni_ncbi <- bitr(uni, fromType = 'ENSEMBL', toType = 'ENTREZID', OrgDb = 'org.Hs.eg.db')$ENTREZID
+    
+    go_cluster$KEGG <- tryCatch(compareCluster(genes_ncbi, fun = 'enrichKEGG',
+        universe = uni_ncbi, organism = 'hsa', pAdjustMethod = 'BH',
+        pvalueCutoff = 0.1, qvalueCutoff = 0.05, keyType = 'ncbi-geneid'),
+        error = function(e) { return(NULL) })
+    
     return(go_cluster)
 }
 
@@ -447,6 +457,21 @@ run_gse <-  function(region, ont = c('BP', 'MF', 'CC')) {
             error = function(e) { return(NULL) })
     })
     names(go_cluster) <- ont
+    
+    
+    
+    genes_tab <- bitr(names(genes), fromType = 'ENSEMBL', toType = 'ENTREZID', OrgDb = 'org.Hs.eg.db')
+    genes_tab <- genes_tab[!duplicated(genes_tab$ENTREZID), ]
+        
+    genes_m <- match(genes_tab$ENSEMBL, names(genes))
+    genes_ncbi <- genes[genes_m]
+    names(genes_ncbi) <- genes_tab$ENTREZID
+
+    go_cluster$KEGG <- tryCatch(gseKEGG(genes_ncbi, organism = 'hsa',
+        pAdjustMethod = "BH",
+        keyType = 'ncbi-geneid', verbose = TRUE),
+        error = function(e) { return(NULL) })
+        
     return(go_cluster)
 }
 
