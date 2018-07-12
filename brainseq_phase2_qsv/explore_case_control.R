@@ -454,7 +454,8 @@ names(de_genes_sign_top) <- names(de_genes_sign)
 as.data.frame(sapply(de_genes_sign_top, length))
 
 ## Pretty venn code
-venn_cols <- brewer.pal('Set1', n = 4)
+#venn_cols <- brewer.pal('Set1', n = 4)
+venn_cols <- c('skyblue3', 'dark orange', 'red', 'purple')
 names(venn_cols) <- paste0(rep(c('DLPFC', 'HIPPO'), each = 2), '_', c('control', 'SCZD'))
 make_venn_pretty <- function(genes, title = 'DE features grouped by gene id') {
     genes <- lapply(genes, function(x) x[!is.na(x)])
