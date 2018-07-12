@@ -367,7 +367,7 @@ make_venn <- function(i, txt = 'HIPPO_', cut = 0.1) {
     vinfo <- lapply(c(outGene, do.call(c, outFeat))[i], function(x) {
         x$ensemblID[x$adj.P.Val < cut]
     })
-    names(vinfo) <- gsub(txt, '', names(vinfo))
+    names(vinfo) <- gsub('_match', '.gene', gsub(txt, '', names(vinfo)))
     venn(vinfo) + title(paste('FDR cutoff:', cut))
 }
 
@@ -399,7 +399,6 @@ make_venn2(c(2, 4, 6))
 make_venn2(3:6)
 make_venn2(c(4, 6, 7, 8))
 make_venn2(5:6)
-make_venn2(c(5, 6, 7, 8))
 make_venn2(c(5, 6, 7, 8))
 make_venn2(c(6, 9:10))
 make_venn2(c(6, 9:11))
