@@ -69,6 +69,11 @@ outFeat <- lapply(c('/dcl01/ajaffe/data/lab/qsva_brain/brainseq_phase2_qsv/rdas/
     return(list('exon' = outExon, 'jxn' = outJxn, 'tx' = outTx))
 })
 names(outFeat) <- c('DLPFC', 'HIPPO')
+# > sapply(outFeat, function(x) { sapply(x, nrow) })
+#       DLPFC  HIPPO
+# exon 396583 396583
+# jxn  297181 297181
+# tx    92732  92732
 
 
 ## Get number of DE genes at different FDR cutoffs
@@ -82,14 +87,14 @@ n_de <- do.call(rbind, lapply(c(0.05, 0.1, 0.15, 0.2), function(cut) {
 options(width = 200)
 n_de
 #       HIPPO_allQSV DLPFC_allQSV HIPPO_noHGoldQSV DLPFC_noHGoldQSV HIPPO_matchQSV DLPFC_matchQSV  BSP1   CMC DLPFC.exon DLPFC.jxn DLPFC.tx HIPPO.exon HIPPO.jxn HIPPO.tx cutoff
-# FALSE        24652        24307            24635            24190          24604          24407 23939 23746     396143    297144    92726     297140    297140    92732   0.05
-# TRUE             0          345               17              462             48            245   183   376        440        37        6         41        41        0   0.05
-# FALSE        24648        23923            24592            23800          24551          24020 23616 23220     394775    297091    92712     297116    297116    92731   0.10
-# TRUE             4          729               60              852            101            632   506   902       1808        90       20         65        65        1   0.10
-# FALSE        24601        23543            24502            23360          24489          23618 23205 22661     393038    296960    92699     297025    297025    92709   0.15
-# TRUE            51         1109              150             1292            163           1034   917  1461       3545       221       33        156       156       23   0.15
-# FALSE        24524        23112            24369            22857          24320          23103 22736 22002     390412    296762    92671     296905    296905    92643   0.20
-# TRUE           128         1540              283             1795            332           1549  1386  2120       6171       419       61        276       276       89   0.20
+# FALSE        24652        24307            24635            24190          24604          24407 23939 23746     396143    297144    92726     396386    297140    92732   0.05
+# TRUE             0          345               17              462             48            245   183   376        440        37        6        197        41        0   0.05
+# FALSE        24648        23923            24592            23800          24551          24020 23616 23220     394775    297091    92712     396007    297116    92731   0.10
+# TRUE             4          729               60              852            101            632   506   902       1808        90       20        576        65        1   0.10
+# FALSE        24601        23543            24502            23360          24489          23618 23205 22661     393038    296960    92699     395442    297025    92709   0.15
+# TRUE            51         1109              150             1292            163           1034   917  1461       3545       221       33       1141       156       23   0.15
+# FALSE        24524        23112            24369            22857          24320          23103 22736 22002     390412    296762    92671     394224    296905    92643   0.20
+# TRUE           128         1540              283             1795            332           1549  1386  2120       6171       419       61       2359       276       89   0.20
 
 data.frame(colnames(n_de))
 #     colnames.n_de.
@@ -157,12 +162,12 @@ n_de_sign$group <- ifelse(n_de_sign$sign == 0, 'none', ifelse(n_de_sign$sign == 
 # 40       TRUE      0    0   0.05       DLPFC.tx    none
 # 41      FALSE  47980    1   0.05       DLPFC.tx    SCZD
 # 42       TRUE      2    1   0.05       DLPFC.tx    SCZD
-# 43      FALSE 152287   -1   0.05     HIPPO.exon Control
-# 44       TRUE      9   -1   0.05     HIPPO.exon Control
+# 43      FALSE 194911   -1   0.05     HIPPO.exon Control
+# 44       TRUE     56   -1   0.05     HIPPO.exon Control
 # 45      FALSE      0    0   0.05     HIPPO.exon    none
 # 46       TRUE      0    0   0.05     HIPPO.exon    none
-# 47      FALSE 144853    1   0.05     HIPPO.exon    SCZD
-# 48       TRUE     32    1   0.05     HIPPO.exon    SCZD
+# 47      FALSE 201475    1   0.05     HIPPO.exon    SCZD
+# 48       TRUE    141    1   0.05     HIPPO.exon    SCZD
 # 49      FALSE 152287   -1   0.05      HIPPO.jxn Control
 # 50       TRUE      9   -1   0.05      HIPPO.jxn Control
 # 51      FALSE      0    0   0.05      HIPPO.jxn    none
@@ -217,12 +222,12 @@ n_de_sign$group <- ifelse(n_de_sign$sign == 0, 'none', ifelse(n_de_sign$sign == 
 # 100      TRUE      0    0   0.10       DLPFC.tx    none
 # 101     FALSE  47972    1   0.10       DLPFC.tx    SCZD
 # 102      TRUE     10    1   0.10       DLPFC.tx    SCZD
-# 103     FALSE 152282   -1   0.10     HIPPO.exon Control
-# 104      TRUE     14   -1   0.10     HIPPO.exon Control
+# 103     FALSE 194789   -1   0.10     HIPPO.exon Control
+# 104      TRUE    178   -1   0.10     HIPPO.exon Control
 # 105     FALSE      0    0   0.10     HIPPO.exon    none
 # 106      TRUE      0    0   0.10     HIPPO.exon    none
-# 107     FALSE 144834    1   0.10     HIPPO.exon    SCZD
-# 108      TRUE     51    1   0.10     HIPPO.exon    SCZD
+# 107     FALSE 201218    1   0.10     HIPPO.exon    SCZD
+# 108      TRUE    398    1   0.10     HIPPO.exon    SCZD
 # 109     FALSE 152282   -1   0.10      HIPPO.jxn Control
 # 110      TRUE     14   -1   0.10      HIPPO.jxn Control
 # 111     FALSE      0    0   0.10      HIPPO.jxn    none
@@ -277,12 +282,12 @@ n_de_sign$group <- ifelse(n_de_sign$sign == 0, 'none', ifelse(n_de_sign$sign == 
 # 160      TRUE      0    0   0.15       DLPFC.tx    none
 # 161     FALSE  47965    1   0.15       DLPFC.tx    SCZD
 # 162      TRUE     17    1   0.15       DLPFC.tx    SCZD
-# 163     FALSE 152256   -1   0.15     HIPPO.exon Control
-# 164      TRUE     40   -1   0.15     HIPPO.exon Control
+# 163     FALSE 194588   -1   0.15     HIPPO.exon Control
+# 164      TRUE    379   -1   0.15     HIPPO.exon Control
 # 165     FALSE      0    0   0.15     HIPPO.exon    none
 # 166      TRUE      0    0   0.15     HIPPO.exon    none
-# 167     FALSE 144769    1   0.15     HIPPO.exon    SCZD
-# 168      TRUE    116    1   0.15     HIPPO.exon    SCZD
+# 167     FALSE 200854    1   0.15     HIPPO.exon    SCZD
+# 168      TRUE    762    1   0.15     HIPPO.exon    SCZD
 # 169     FALSE 152256   -1   0.15      HIPPO.jxn Control
 # 170      TRUE     40   -1   0.15      HIPPO.jxn Control
 # 171     FALSE      0    0   0.15      HIPPO.jxn    none
@@ -337,12 +342,12 @@ n_de_sign$group <- ifelse(n_de_sign$sign == 0, 'none', ifelse(n_de_sign$sign == 
 # 220      TRUE      0    0   0.20       DLPFC.tx    none
 # 221     FALSE  47950    1   0.20       DLPFC.tx    SCZD
 # 222      TRUE     32    1   0.20       DLPFC.tx    SCZD
-# 223     FALSE 152209   -1   0.20     HIPPO.exon Control
-# 224      TRUE     87   -1   0.20     HIPPO.exon Control
+# 223     FALSE 194097   -1   0.20     HIPPO.exon Control
+# 224      TRUE    870   -1   0.20     HIPPO.exon Control
 # 225     FALSE      0    0   0.20     HIPPO.exon    none
 # 226      TRUE      0    0   0.20     HIPPO.exon    none
-# 227     FALSE 144696    1   0.20     HIPPO.exon    SCZD
-# 228      TRUE    189    1   0.20     HIPPO.exon    SCZD
+# 227     FALSE 200127    1   0.20     HIPPO.exon    SCZD
+# 228      TRUE   1489    1   0.20     HIPPO.exon    SCZD
 # 229     FALSE 152209   -1   0.20      HIPPO.jxn Control
 # 230      TRUE     87   -1   0.20      HIPPO.jxn Control
 # 231     FALSE      0    0   0.20      HIPPO.jxn    none
@@ -436,8 +441,8 @@ xx
 # D.jxn_SCZD                 29  8     34
 # D.tx_Control               10  9     10
 # D.tx_SCZD                  10 10     10
-# H.exon_Control             55 11     68
-# H.exon_SCZD               111 12    155
+# H.exon_Control            346 11    870
+# H.exon_SCZD               629 12   1489
 # H.jxn_Control              55 13     68
 # H.jxn_SCZD                111 14    155
 # H.tx_Control               19 15     19
