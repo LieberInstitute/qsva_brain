@@ -623,7 +623,7 @@ run_go <- function(genes, ont = c('BP', 'MF', 'CC')) {
 ## Development DE genes
 if(!file.exists('rdas/go_de_genes.Rdata')) {
     system.time( go_de_genes <- run_go(de_genes_sign[c(1:2, 11:14, 3:8)]) )
-    message(paste(Sys.time(), 'saving rda/go_de_genes.Rdata'))
+    message(paste(Sys.time(), 'saving rdas/go_de_genes.Rdata'))
     save(go_de_genes, file = 'rdas/go_de_genes.Rdata')
 } else {
     message(paste(Sys.time(), 'loading rdas/go_de_genes.Rdata'))
@@ -636,7 +636,7 @@ if(!file.exists('rdas/go_de_genes_top.Rdata')) {
         run_go(lapply(de_genes_sign_top[c(1:2, 11:14, 3:8)], head, n = n))
     })
     names(go_de_genes_top) <- c(50, 100, 150, 200)
-    message(paste(Sys.time(), 'saving rda/go_de_genes_top.Rdata'))
+    message(paste(Sys.time(), 'saving rdas/go_de_genes_top.Rdata'))
     save(go_de_genes_top, file = 'rdas/go_de_genes_top.Rdata')
 } else {
     message(paste(Sys.time(), 'loading rdas/go_de_genes_top.Rdata'))
