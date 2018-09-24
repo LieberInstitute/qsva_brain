@@ -1,6 +1,10 @@
 # qsva_brain
 
-JHPCE location: `/dcl01/ajaffe/data/lab/qsva_brain`
+This repository contains the code for the SCZD case vs control differential expression analysis for the BrainSeq Phase II project (see the [`brainseq_phase2` repo](https://github.com/LieberInstitute/brainseq_phase2)). It was carried out by [Amy Peterson](https://amy-peterson.github.io/) as part of her JHSPH MPH project.
+
+## Citation
+
+If you use anything in this repository please cite the [BrainSeq Phase II project](https://github.com/LieberInstitute/brainseq_phase2#citation).
 
 ## Scripts
 
@@ -92,3 +96,7 @@ expr_data/run_merge_data.sh
 means/qsva_bws.sh
       19 means/qsva_bws.sh
 ```
+
+## LIBD internal
+
+JHPCE location: `/dcl01/ajaffe/data/lab/qsva_brain`
