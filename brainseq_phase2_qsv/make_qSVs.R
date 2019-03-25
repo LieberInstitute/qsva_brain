@@ -63,7 +63,27 @@ hipxl <- read_excel('/dcl01/lieber/ajaffe/lab/brainseq_phase2/LIBD_PhaseII_HIPPO
 
 ## Drop age<=17 and HIPPO Gold samples
 hipHMR <- as.integer(gsub('R', '', colnames(rse_gene))) %in% hipxl$RNum[hipxl$Protocol == 'RiboZeroHMR']
+table(hipHMR, rse_gene$Region)
+# hipHMR  DLPFC HIPPO
+#   FALSE   453    43
+#   TRUE      0   404
+table(hipHMR, 'Age > 17' = rse_gene$Age > 17, rse_gene$Region)
+# , ,  = DLPFC
+#
+#        Age > 17
+# hipHMR  FALSE TRUE
+#   FALSE    74  379
+#   TRUE      0    0
+#
+# , ,  = HIPPO
+#
+#        Age > 17
+# hipHMR  FALSE TRUE
+#   FALSE     0   43
+#   TRUE     71  333
 hipHMR[rse_gene$Region == 'DLPFC'] <- TRUE
+
+
 
 keepIndex <- which(rse_gene$Age > 17 & hipHMR)
 length(keepIndex)
