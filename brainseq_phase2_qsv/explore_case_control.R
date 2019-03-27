@@ -734,21 +734,31 @@ plot_gse <- function(gse) {
             return(NULL)
         }
 
-        print(dotplot(go, title = paste('ontology:', bp), font.size = 18))
+        print(dotplot(go, title = paste('ontology:', bp), font.size = 18, color = 'pvalue') + xlab('Gene Ratio: Count / Total') + theme_bw(base_size =30))
         return(NULL)
     })
 }
 
 
-pdf('pdf/gse_hippo.pdf', width = 14, height = 9, useDingbats = FALSE)
+pdf('pdf/gse_hippo.pdf', width = 15, height = 8, useDingbats = FALSE)
 plot_gse(gse_hippo)
 dev.off()
 
-pdf('pdf/gse_dlpfc.pdf', width = 14, height = 9, useDingbats = FALSE)
+pdf('pdf/gse_dlpfc.pdf', width = 17, height = 8, useDingbats = FALSE)
 plot_gse(gse_dlpfc)
 dev.off()
 
 
+extract_gse_table <- function(gse, region) {
+    res <- do.call(rbind, mapply(function(x, type) { cbind(x@result, type = type) }, gse, names(gse), SIMPLIFY = FALSE))
+    res$region <- region
+    return(res)
+}
+
+gse_tab <- do.call(rbind, mapply(extract_gse_table, list(gse_dlpfc, gse_hippo), c('DLPFC', 'HIPPO'), SIMPLIFY = FALSE))
+rownames(gse_tab) <- NULL
+write.table(gse_tab, file = 'TableSxx_gse_terms.txt', sep = '\t', quote = FALSE, row.names = FALSE)
+save(gse_tab, file = 'rdas/gse_tab.Rdata')
 
 ## Scatter of logFC
 comp_log <- function(x, y, xlab, ylab, var = 'logFC', de = FALSE, n = 150, onlyx = FALSE) {
