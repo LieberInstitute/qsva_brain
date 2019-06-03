@@ -8,7 +8,7 @@ author:
   email: andrew.jaffe@libd.org
 - name: Leonardo Collado-Torres
   affiliation: Lieber Institute for Brain Development
-  email: leo.collado@libd.org
+  email: lcolladotor@gmail.com
 output:
   BiocStyle::html_document
 abstract: |
