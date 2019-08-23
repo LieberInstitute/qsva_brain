@@ -3,15 +3,6 @@
 
 This repository contains the code for the SCZD case vs control differential expression analysis for the BrainSeq Phase II project (see the [`brainseq_phase2` repo](https://github.com/LieberInstitute/brainseq_phase2)). It was carried out by [Amy Peterson](https://amy-peterson.github.io/) as part of her JHSPH MPH project.
 
-## License
-
-<img src="https://licensebuttons.net/l/by-nc/3.0/88x31.png" alt width="88" height="31" scale="0">
-Attribution-NonCommercial: CC BY-NC
-
-This license lets others remix, tweak, and build upon our work non-commercially as long as they acknowledge our work.
-
-[View License Deed](https://creativecommons.org/licenses/by-nc/4.0) | [View Legal Code](https://creativecommons.org/licenses/by-nc/4.0/legalcode)
-
 ## Citation
 
 If you use anything in this repository please cite the [BrainSeq Phase II project](https://github.com/LieberInstitute/brainseq_phase2#citation).
