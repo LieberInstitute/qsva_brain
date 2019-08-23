@@ -1,4 +1,5 @@
 # qsva_brain
+[![DOI](https://zenodo.org/badge/118816938.svg)](https://zenodo.org/badge/latestdoi/118816938)
 
 This repository contains the code for the SCZD case vs control differential expression analysis for the BrainSeq Phase II project (see the [`brainseq_phase2` repo](https://github.com/LieberInstitute/brainseq_phase2)). It was carried out by [Amy Peterson](https://amy-peterson.github.io/) as part of her JHSPH MPH project.
 
