@@ -109,4 +109,4 @@ means/qsva_bws.sh
 
 ## LIBD internal
 
-JHPCE location: `/dcl01/ajaffe/data/lab/qsva_brain`
+JHPCE location: `/dcs04/lieber/lcolladotor/qSVA_LIBD3080/qsva_brain`
